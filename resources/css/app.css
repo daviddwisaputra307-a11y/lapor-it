@@ -1,3 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+.form-control {
+  width: 100% !important;
+  display: block !important;
+  box-sizing: border-box;
+}
