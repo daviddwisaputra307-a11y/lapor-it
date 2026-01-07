@@ -39,4 +39,29 @@ class TicketController extends Controller
 
         return redirect()->back()->with('success', 'Laporan berhasil dikirim ✅');
     }
+    public function index()
+    {
+        $user = auth()->user();
+
+        if ($user->role == 'admin') {
+            // 1. ADMIN: Melihat SEMUA tiket (untuk pengawasan)
+            $tickets = \App\Models\Ticket::with('user')->latest()->get();
+
+        } elseif ($user->role == 'teknisi') {
+            // 2. TEKNISI: Hanya melihat tiket yang DITUGASKAN kepadanya
+            $tickets = \App\Models\Ticket::with('user')
+                            ->where('teknisi_id', $user->id) // Filter berdasarkan ID Teknisi
+                            ->latest()
+                            ->get();
+
+        } else {
+            // 3. USER: Hanya melihat tiket buatan SENDIRI
+            $tickets = \App\Models\Ticket::with('user')
+                            ->where('user_id', $user->id)
+                            ->latest()
+                            ->get();
+        }
+
+        return view('dashboard', compact('tickets'));
+    }
 }

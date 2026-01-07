@@ -12,14 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
+            $table->id(); // PK
             $table->string('name');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            
+            // Tambahan sesuai catatan 6.1
+            $table->enum('role', ['user', 'admin', 'teknisi'])->default('user');
+            $table->string('unit_kerja')->nullable(); // Boleh kosong
+            
+            $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
-            $table->timestamps();
+            $table->timestamps(); // created_at, updated_at
         });
+        
     }
 
     /**

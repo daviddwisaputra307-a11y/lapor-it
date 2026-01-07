@@ -10,9 +10,11 @@ class Ticket extends Model
 {
     use HasFactory;
 
+    protected $guarded = [];
+
     protected $table = 'tickets';
 
-    protected $fillable = [
+    /*protected $fillable = [
         'nomor_tiket',
         'user_id',
         'judul',
@@ -20,7 +22,7 @@ class Ticket extends Model
         'lokasi',
         'prioritas',
         'status',
-    ];
+    ];*/
 
     // auto generate nomor tiket
     protected static function booted()
@@ -36,5 +38,10 @@ class Ticket extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 }
