@@ -9,6 +9,19 @@ use Illuminate\Support\Facades\DB;
 
 class TicketController extends Controller
 {
+    public function index()
+{
+    // ambil semua ticket terbaru dulu
+    $tickets = Ticket::orderBy('created_at', 'desc')->get();
+
+    return view('tickets.index', compact('tickets'));
+}
+
+public function show(Ticket $ticket)
+{
+    return view('tickets.show', compact('ticket'));
+}
+
     public function create()
     {
         // Ambil lokasi/unit kerja dari SQL Server (default connection = sqlsrv)
@@ -37,6 +50,6 @@ class TicketController extends Controller
             'status' => 'Open',
         ]);
 
-        return redirect()->back()->with('success', 'Laporan berhasil dikirim ✅');
+        return redirect()->route('tickets.index')->with('success', 'Laporan berhasil dikirim');
     }
 }

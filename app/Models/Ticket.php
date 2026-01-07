@@ -19,6 +19,7 @@ class Ticket extends Model
         'deskripsi',
         'lokasi',
         'prioritas',
+        'teknisi',
         'status',
     ];
 
