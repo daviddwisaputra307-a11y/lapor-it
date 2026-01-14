@@ -24,7 +24,15 @@
         <h2 style="margin:0;">🛠️ Admin - Semua Tiket</h2>
         <div class="muted">Lihat semua tiket, cek detail, assign teknisi, ubah status.</div>
       </div>
-      <a class="btn" href="{{ route('tickets.index') }}">↩ Ke User List</a>
+    <div style="display:flex; gap:8px;">
+    <a class="btn" href="{{ route('dashboard.admin') }}">
+        ← Dashboard Admin
+    </a>
+
+    <a class="btn" href="{{ route('tickets.index') }}">
+        Ke User List
+    </a>
+  </div>
     </div>
 
     <div class="card">
@@ -50,7 +58,7 @@
               <td><span class="badge">{{ $t->status }}</span></td>
               <td>{{ $t->teknisi ?? '-' }}</td>
               <td>
-                <a class="btn" href="{{ route('admin.tickets.show', $t->id) }}">Detail</a>
+                <a class="btn" href="{{ route('admin.tickets.show', $t->id) }}"> Detail</a>
               </td>
             </tr>
           @endforeach

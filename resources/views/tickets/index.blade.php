@@ -17,8 +17,15 @@
 <body>
 <div class="card">
     <h2>📋 Daftar Laporan IT</h2>
-    <p><a class="btn" href="/tickets/create">+ Buat Laporan</a></p>
+    <div style="display:flex; gap:10px; margin-bottom:16px;">
+  <a class="btn" href="/dashboard">
+    ← Dashboard
+  </a>
 
+  <a class="btn" href="/tickets/create">
+    + Buat Laporan
+  </a>
+</div>
     <table>
         <thead>
             <tr>

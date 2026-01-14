@@ -7,6 +7,11 @@ use Illuminate\Http\Request;
 
 class AdminTicketController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(['auth', 'role:admin']);
+    }
+
     public function index()
     {
         $tickets = Ticket::latest()->paginate(10);
@@ -15,7 +20,7 @@ class AdminTicketController extends Controller
 
     public function show(Ticket $ticket)
     {
-        // list teknisi contoh (nanti bisa ambil dari tabel users/pegawai)
+        // daftar teknisi sementara (nanti bisa ambil dari tabel teknisi)
         $teknisiList = ['Rizky', 'Agus', 'Budi', 'Dina', 'Teknisi A'];
 
         return view('admin.tickets.show', compact('ticket', 'teknisiList'));
@@ -24,30 +29,30 @@ class AdminTicketController extends Controller
     public function assign(Request $request, Ticket $ticket)
     {
         $request->validate([
-            'teknisi' => 'required|string|max:100',
+            'teknisi' => 'nullable|string|max:100',
         ]);
 
-        $ticket->teknisi = $request->teknisi;
+        $ticket->teknisi = $request->teknisi; // kolom teknisi (string)
         $ticket->save();
 
-        return back()->with('success', 'Teknisi berhasil di-assign.');
+        return redirect()
+            ->route('admin.tickets.show', $ticket->id)
+            ->with('success', 'Teknisi berhasil disimpan.');
     }
 
     public function status(Request $request, Ticket $ticket)
     {
         $request->validate([
-            'status' => 'required|in:Open,On Progress,Done,Cancel',
-            'prioritas' => 'nullable|in:Low,Medium,High,Urgent',
+            'status' => 'required|string|max:50',
+            'prioritas' => 'nullable|string|max:50',
         ]);
 
         $ticket->status = $request->status;
-
-        if ($request->filled('prioritas')) {
-            $ticket->prioritas = $request->prioritas;
-        }
-
+        $ticket->prioritas = $request->prioritas;
         $ticket->save();
 
-        return back()->with('success', 'Status/prioritas berhasil diupdate.');
+        return redirect()
+            ->route('admin.tickets.show', $ticket->id)
+            ->with('success', 'Status/Prioritas berhasil diupdate.');
     }
 }

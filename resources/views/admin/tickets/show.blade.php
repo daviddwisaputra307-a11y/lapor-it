@@ -1,115 +1,160 @@
-<x-app-layout>
-<!doctype html>
-<html lang="id">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin - Detail Tiket</title>
-  <style>
-    body{font-family:Arial, sans-serif;background:#f6f7fb;margin:0;padding:30px;}
-    .wrap{max-width:900px;margin:0 auto;}
-    .card{background:#fff;border:1px solid #e6e8f0;border-radius:12px;padding:18px;margin-bottom:14px;}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-    label{font-size:12px;color:#6b7280;display:block;margin-bottom:6px;}
-    input,select,textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;}
-    textarea{min-height:120px;resize:vertical;}
-    .btn{display:inline-block;padding:10px 14px;border-radius:10px;background:#2563eb;color:#fff;text-decoration:none;border:none;cursor:pointer;}
-    .btn2{background:#111827;}
-    .pill{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid #ddd;font-size:12px;}
-    .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
-    .success{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;padding:10px;border-radius:10px;margin-bottom:12px;}
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <div class="top">
-      <h2 style="margin:0;">📄 Detail Tiket (Admin)</h2>
-      <a class="btn btn2" href="{{ route('admin.tickets.index') }}">← Kembali</a>
+{{-- resources/views/admin/tickets/show.blade.php --}}
+@extends('layouts.admin')
+
+@section('title', 'Detail Ticket (Admin)')
+
+@section('content')
+<style>
+  .wrap{max-width:1100px;margin:0 auto}
+  .row{display:flex;gap:16px;flex-wrap:wrap}
+  .col{flex:1;min-width:320px}
+
+  .card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:18px;box-shadow:0 8px 20px rgba(15,23,42,.06)}
+  .title{font-size:22px;font-weight:800;margin:0}
+  .muted{color:#64748b;font-size:13px;margin-top:6px}
+
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:13px;font-weight:800;border:1px solid transparent}
+  .chip-blue{background:#dbeafe;color:#1d4ed8;border-color:#bfdbfe}
+  .chip-sky{background:#e0f2fe;color:#075985;border-color:#bae6fd}
+  .chip-amber{background:#fef3c7;color:#92400e;border-color:#fde68a}
+  .chip-green{background:#dcfce7;color:#166534;border-color:#bbf7d0}
+  .chip-red{background:#fee2e2;color:#991b1b;border-color:#fecaca}
+  .chip-slate{background:#f1f5f9;color:#334155;border-color:#e2e8f0}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:10px;font-weight:900;text-decoration:none;border:1px solid transparent;cursor:pointer}
+  .btn-blue{background:#2563eb;color:#fff;border-color:#2563eb}
+  .btn-blue:hover{filter:brightness(.95)}
+  .btn-outline{background:#fff;color:#2563eb;border-color:#2563eb}
+  .btn-outline:hover{background:#eff6ff}
+
+  label{display:block;font-size:13px;color:#475569;margin:10px 0 6px}
+  select,input,textarea{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:10px;background:#fff}
+  textarea{min-height:90px;resize:vertical}
+</style>
+
+@php
+  $st = $ticket->status ?? '-';
+  $statusChip = match($st){
+    'Open' => 'chip-blue',
+    'On Progress' => 'chip-amber',
+    'Done' => 'chip-green',
+    'Cancel' => 'chip-red',
+    default => 'chip-slate'
+  };
+
+  $pr = $ticket->prioritas ?? '-';
+  $prioChip = match($pr){
+    'Low' => 'chip-slate',
+    'Medium' => 'chip-sky',
+    'High' => 'chip-amber',
+    'Urgent' => 'chip-red',
+    default => 'chip-slate'
+  };
+@endphp
+
+<div class="wrap">
+
+  {{-- Header --}}
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
+    <div>
+      <h1 class="title">Detail Ticket (Admin)</h1>
+      <div class="muted"></div>
     </div>
 
-    @if(session('success'))
-      <div class="success">{{ session('success') }}</div>
-    @endif
+    <a href="{{ route('admin.tickets.index') }}" class="btn btn-outline">← Kembali</a>
+  </div>
 
-    <div class="card">
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-        <div class="pill">No: <b>{{ $ticket->nomor_tiket }}</b></div>
-        <div class="pill">Status: <b>{{ $ticket->status }}</b></div>
-        <div class="pill">Prioritas: <b>{{ $ticket->prioritas ?? '-' }}</b></div>
-        <div class="pill">Teknisi: <b>{{ $ticket->teknisi ?? '-' }}</b></div>
+  {{-- Alert --}}
+  @if(session('success'))
+    <div style="background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;padding:10px 12px;border-radius:12px;margin-bottom:12px;">
+      {{ session('success') }}
+    </div>
+  @endif
+
+  {{-- Badges --}}
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+    <span class="chip chip-blue">No: {{ $ticket->nomor_tiket ?? '-' }}</span>
+    <span class="chip {{ $statusChip }}">Status: {{ $st }}</span>
+    <span class="chip {{ $prioChip }}">Prioritas: {{ $pr }}</span>
+    <span class="chip chip-sky">Teknisi: {{ $ticket->teknisi ?? '-' }}</span>
+  </div>
+
+  <div class="row">
+    {{-- KIRI: Info Ticket --}}
+    <div class="col card">
+      <div style="font-weight:900;margin-bottom:10px;">Informasi Ticket</div>
+
+      <label>Tanggal</label>
+      <input value="{{ $ticket->created_at ? $ticket->created_at->format('Y-m-d H:i:s') : '-' }}" readonly>
+
+      <label>Lokasi</label>
+      <input value="{{ $ticket->lokasi ?? '-' }}" readonly>
+
+      <label>Judul</label>
+      <input value="{{ $ticket->judul ?? '-' }}" readonly>
+
+      <label>Deskripsi</label>
+      <textarea readonly>{{ $ticket->deskripsi ?? '-' }}</textarea>
+    </div>
+
+    {{-- KANAN: Aksi --}}
+    <div class="col" style="display:flex;flex-direction:column;gap:16px;">
+
+      {{-- Assign Teknisi --}}
+      <div class="card">
+        <div style="font-weight:900;margin-bottom:10px;">Assign Teknisi</div>
+
+        <form method="POST" action="{{ route('admin.tickets.assign', $ticket->id) }}">
+          @csrf
+
+          <label>Pilih teknisi</label>
+          <select name="teknisi" required>
+            <option value="">-- pilih --</option>
+            @foreach(($teknisiList ?? []) as $t)
+              <option value="{{ $t }}" {{ ($ticket->teknisi === $t) ? 'selected' : '' }}>
+                {{ $t }}
+              </option>
+            @endforeach
+          </select>
+
+          <div style="height:12px;"></div>
+          <button type="submit" class="btn btn-blue" style="width:100%;">Simpan Teknisi</button>
+        </form>
       </div>
-      <hr style="border:none;border-top:1px solid #eee;margin:14px 0;">
 
-   <div class="row g-3">
-  <div class="col-12 col-md-8">
-    <label class="form-label mb-1">Judul</label>
-    <input type="text" class="form-control w-100" value="{{ $ticket->judul }}" readonly>
-  </div>
+      {{-- Update Status / Prioritas --}}
+      <div class="card">
+        <div style="font-weight:900;margin-bottom:10px;">Update Status / Prioritas</div>
 
-  <div class="col-12 col-md-4">
-    <label class="form-label mb-1">Lokasi</label>
-    <input type="text" class="form-control w-100" value="{{ $ticket->lokasi }}" readonly>
-  </div>
-</div>
+        <form method="POST" action="{{ route('admin.tickets.status', $ticket->id) }}">
+          @csrf
 
-<div class="mt-3">
-  <label class="form-label mb-1">Deskripsi</label>
-  <textarea class="form-control w-100" rows="4" readonly>{{ $ticket->deskripsi }}</textarea>
-</div>
+          <label>Status</label>
+          <select name="status" required>
+            @foreach(['Open','On Progress','Done','Cancel'] as $s)
+              <option value="{{ $s }}" {{ ($ticket->status === $s) ? 'selected' : '' }}>
+                {{ $s }}
+              </option>
+            @endforeach
+          </select>
 
-<hr class="my-4">
+          <label>Prioritas</label>
+          <select name="prioritas">
+            <option value="">-- pilih --</option>
+            @foreach(['Low','Medium','High','Urgent'] as $p)
+              <option value="{{ $p }}" {{ ($ticket->prioritas === $p) ? 'selected' : '' }}>
+                {{ $p }}
+              </option>
+            @endforeach
+          </select>
 
-    <div class="card">
-      <h3 style="margin:0 0 10px 0;">Assign Teknisi</h3>
-      <form method="POST" action="{{ route('admin.tickets.assign', $ticket->id) }}">
-        @csrf
-        <div class="row">
-          <div>
-            <label>Pilih Teknisi</label>
-            <select name="teknisi" required>
-              <option value="">-- pilih --</option>
-              @foreach($teknisiList as $tek)
-                <option value="{{ $tek }}" @selected($ticket->teknisi === $tek)>{{ $tek }}</option>
-              @endforeach
-            </select>
-          </div>
-          <div style="display:flex;align-items:end;">
-            <button class="btn" type="submit">Simpan Teknisi</button>
-          </div>
-        </div>
-      </form>
-    </div>
+          <div style="height:12px;"></div>
+          <button type="submit" class="btn btn-blue" style="width:100%;">Update</button>
+        </form>
+      </div>
 
-    <div class="card">
-      <h3 style="margin:0 0 10px 0;">Ubah Status / Prioritas</h3>
-      <form method="POST" action="{{ route('admin.tickets.status', $ticket->id) }}">
-        @csrf
-        <div class="row">
-          <div>
-            <label>Status</label>
-            <select name="status" required>
-              @foreach(['Open','On Progress','Done','Cancel'] as $s)
-                <option value="{{ $s }}" @selected($ticket->status === $s)>{{ $s }}</option>
-              @endforeach
-            </select>
-          </div>
-          <div>
-            <label>Prioritas</label>
-            <select name="prioritas">
-              <option value="">(biarin)</option>
-              @foreach(['Low','Medium','High','Urgent'] as $p)
-                <option value="{{ $p }}" @selected($ticket->prioritas === $p)>{{ $p }}</option>
-              @endforeach
-            </select>
-          </div>
-        </div>
-        <div style="margin-top:12px;">
-          <button class="btn" type="submit">Update</button>
-        </div>
-      </form>
     </div>
   </div>
-  </x-app-layout>
-</body>
-</html>
 
+</div>
+@endsection
