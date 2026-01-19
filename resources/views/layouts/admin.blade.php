@@ -21,7 +21,7 @@
             <div class="flex items-center gap-3">
                 <div class="text-sm">
                     <span class="font-semibold">{{ Auth::user()->name ?? '-' }}</span>
-                    <span class="text-gray-500">({{ Auth::user()->role ?? 'user' }})</span>
+                    <span class="text-gray-500">({{ Auth::user()->USERLOG_ROLES ?? 'user' }})</span>
                 </div>
 
                 {{-- tombol balik --}}
