@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-slot name="header">
+<x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Dashboard Pelaporan IT') }}
@@ -8,6 +8,7 @@
                 + Buat Laporan Baru
             </a>
         </div>
+
     </x-slot>
 
     <div class="py-12">
@@ -76,7 +77,6 @@
                             </table>
                         </div>
                     @endif
-
                 </div>
             </div>
         </div>

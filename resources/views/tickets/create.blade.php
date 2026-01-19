@@ -1,282 +1,116 @@
-<!doctype html>
-<html lang="id">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Buat Laporan IT</title>
+@extends('layouts.dashboard')
 
-  <style>
-    :root{
-      --bg: #f5f7fb;
-      --card: #ffffff;
-      --text: #0f172a;
-      --muted: #64748b;
-      --border: #e2e8f0;
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --danger: #ef4444;
-      --success-bg: #dcfce7;
-      --success-text: #166534;
-      --shadow: 0 10px 30px rgba(2, 6, 23, .08);
-      --radius: 14px;
-    }
-
-    *{ box-sizing: border-box; }
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    .wrap{
-      min-height: 100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding: 28px 16px;
-    }
-
-    .card{
-      width: min(720px, 100%);
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-
-    .card-header{
-      padding: 18px 20px;
-      border-bottom: 1px solid var(--border);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 12px;
-    }
-
-    .title{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      font-weight: 800;
-      font-size: 18px;
-      margin:0;
-    }
-
-    .sub{
-      margin: 4px 0 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .back{
-      text-decoration:none;
-      font-size: 13px;
-      padding: 8px 12px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
-      background: #fff;
-    }
-    .back:hover{ background:#f8fafc; }
-
-    .card-body{
-      padding: 18px 20px 20px;
-    }
-
-    .alert-success{
-      margin-bottom: 14px;
-      padding: 10px 12px;
-      background: var(--success-bg);
-      color: var(--success-text);
-      border: 1px solid #86efac;
-      border-radius: 10px;
-      font-size: 14px;
-    }
-
-    .alert-error{
-      margin-bottom: 14px;
-      padding: 10px 12px;
-      background: #fee2e2;
-      color: #991b1b;
-      border: 1px solid #fecaca;
-      border-radius: 10px;
-      font-size: 14px;
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 14px;
-    }
-
-    label{
-      display:block;
-      font-weight: 700;
-      font-size: 13px;
-      margin-bottom: 6px;
-    }
-
-    .hint{
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 6px;
-    }
-
-    input, textarea, select{
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px 12px;
-      font-size: 14px;
-      outline: none;
-      background: #fff;
-    }
-    textarea{ resize: vertical; min-height: 120px; }
-    input:focus, textarea:focus, select:focus{
-      border-color: #93c5fd;
-      box-shadow: 0 0 0 4px rgba(37, 99, 235, .12);
-    }
-
-    .row-2{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-    @media (max-width: 640px){
-      .row-2{ grid-template-columns: 1fr; }
-    }
-
-    .actions{
-      display:flex;
-      gap: 10px;
-      align-items:center;
-      justify-content:flex-end;
-      margin-top: 18px;
-      padding-top: 14px;
-      border-top: 1px dashed var(--border);
-    }
-
-    .btn{
-      border: 0;
-      border-radius: 12px;
-      padding: 12px 14px;
-      font-weight: 800;
-      cursor:pointer;
-      font-size: 14px;
-    }
-    .btn-primary{
-      background: var(--primary);
-      color: white;
-      min-width: 160px;
-    }
-    .btn-primary:hover{ background: var(--primary-hover); }
-
-    .btn-ghost{
-      background: #fff;
-      border: 1px solid var(--border);
-      color: var(--text);
-    }
-    .btn-ghost:hover{ background: #f8fafc; }
-
-    .field-error{
-      color: var(--danger);
-      font-size: 12px;
-      margin-top: 6px;
-      font-weight: 700;
-    }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <h1 class="title">🛠️ Buat Laporan IT</h1>
-        </div>
-
-        <a class="back" href="{{ route('tickets.index') }}">← Daftar Laporan</a>
-      </div>
-
-      <div class="card-body">
-        @if (session('success'))
-          <div class="alert-success">{{ session('success') }}</div>
-        @endif
-
-        @if ($errors->any())
-          <div class="alert-error">
-          </div>
-        @endif
-
-        <form method="POST" action="{{ route('tickets.store') }}">
-          @csrf
-
-          <div class="grid">
-            <div>
-              <label for="judul">Judul</label>
-              <input
-                id="judul"
-                type="text"
-                name="judul"
-                value="{{ old('judul') }}"
-                placeholder="Contoh: Printer error / WiFi lemot / PC bluescreen"
-                required
-              >
-              @error('judul')
-                <div class="field-error">{{ $message }}</div>
-              @enderror
-            </div>
-
-            <div>
-              <label for="deskripsi">Deskripsi</label>
-              <textarea
-                id="deskripsi"
-                name="deskripsi"
-                placeholder="Jelasin singkat: masalahnya apa, kapan kejadian, ada pesan error apa..."
-                required
-              >{{ old('deskripsi') }}</textarea>
-              @error('deskripsi')
-                <div class="field-error">{{ $message }}</div>
-              @enderror
-            </div>
-
-            <div class="row-2">
-              <div>
-                <label for="lokasi">Lokasi / Unit Kerja</label>
-                <select id="lokasi" name="lokasi" required>
-                  <option value="">— pilih lokasi —</option>
-                  @foreach ($bagians as $b)
-                    <option value="{{ $b->KODEBAGIAN }}" {{ old('lokasi') == $b->KODEBAGIAN ? 'selected' : '' }}>
-                      {{ $b->NAMABAGIAN }}
-                    </option>
-                  @endforeach
-                </select>
-                @error('lokasi')
-                  <div class="field-error">{{ $message }}</div>
-                @enderror
-              </div>
-
-              <div>
-                <label for="prioritas">Prioritas</label>
-                <select id="prioritas" name="prioritas">
-                  @php $p = old('prioritas', 'Low'); @endphp
-                  <option value="Low" {{ $p=='Low' ? 'selected' : '' }}>Low</option>
-                  <option value="Medium" {{ $p=='Medium' ? 'selected' : '' }}>Medium</option>
-                  <option value="High" {{ $p=='High' ? 'selected' : '' }}>High</option>
-                  <option value="Urgent" {{ $p=='Urgent' ? 'selected' : '' }}>Urgent</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="actions">
-              <a class="btn btn-ghost" href="{{ route('tickets.index') }}">Batal</a>
-              <button class="btn btn-primary" type="submit">Kirim Laporan</button>
-            </div>
-          </div>
-        </form>
-      </div>
+@section('content')
+<div class="max-w-4xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-semibold text-gray-800">Buat Laporan IT</h1>
+        <a href="{{ route('tickets.index') }}" class="text-sm text-blue-600 hover:underline">
+        </a>
     </div>
+
+    {{-- Alert success --}}
+    @if (session('success'))
+        <div class="mb-4 rounded border border-green-200 bg-green-50 px-4 py-3 text-green-700">
+            <strong>Berhasil!</strong> {{ session('success') }}
+        </div>
+    @endif
+
+    {{-- Error summary --}}
+    @if ($errors->any())
+        <div class="mb-4 rounded border border-red-200 bg-red-50 px-4 py-3 text-red-700">
+            <strong>Gagal:</strong> cek input kamu ya.
+        </div>
+    @endif
+
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <form method="POST" action="{{ route('tickets.store') }}">
+            @csrf
+
+            {{-- Judul --}}
+            <div class="mb-4">
+                <label for="judul" class="block text-sm font-medium text-gray-700 mb-1">Judul</label>
+                <input
+                    id="judul"
+                    type="text"
+                    name="judul"
+                    value="{{ old('judul') }}"
+                    placeholder="Contoh: Printer error / WiFi lemot / PC bluescreen"
+                    class="w-full rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                    required
+                >
+                @error('judul')
+                    <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+                @enderror
+            </div>
+
+            {{-- Deskripsi --}}
+            <div class="mb-4">
+                <label for="deskripsi" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+                <textarea
+                    id="deskripsi"
+                    name="deskripsi"
+                    rows="5"
+                    placeholder="Jelasin singkat: masalahnya apa, kapan kejadian, ada pesan error apa..."
+                    class="w-full rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                    required
+                >{{ old('deskripsi') }}</textarea>
+                @error('deskripsi')
+                    <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {{-- Lokasi --}}
+                <div>
+                    <label for="lokasi" class="block text-sm font-medium text-gray-700 mb-1">Lokasi / Unit Kerja</label>
+                    <select id="lokasi" name="lokasi"
+  
+                    class="w-full rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500" required>
+                  </option>
+                  <option value="" disabled {{ old('lokasi') ? '' : 'selected' }}>
+                  -- pilih lokasi --
+                </option>
+                @foreach ($bagians as $b)
+                <option value="{{ $b->KODEBAGIAN }}"
+                {{ old('lokasi') == $b->KODEBAGIAN ? 'selected' : '' }}>
+                {{ $b->NAMABAGIAN }}
+              </option>
+              @endforeach
+                </select>
+                    @error('lokasi')
+                        <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                {{-- Prioritas --}}
+                <div>
+                    <label for="prioritas" class="block text-sm font-medium text-gray-700 mb-1">Prioritas</label>
+                    <select
+                        id="prioritas"
+                        name="prioritas"
+                        class="w-full rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                        required
+                    >
+                        <option value="Low" {{ old('prioritas', 'Low') == 'Low' ? 'selected' : '' }}>Low</option>
+                        <option value="Medium" {{ old('prioritas') == 'Medium' ? 'selected' : '' }}>Medium</option>
+                        <option value="High" {{ old('prioritas') == 'High' ? 'selected' : '' }}>High</option>
+                    </select>
+                    @error('prioritas')
+                        <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+            <div class="mt-6 flex items-center justify-end gap-3">
+            <a href="{{ url()->previous() }}"
+       class="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50">
+        Batal
+    </a>
+<button type="submit" style="padding:10px 18px; background:#2563eb; color:#fff; border-radius:8px; border:none; font-weight:600;">
+  Kirim
+</button>
   </div>
-</body>
-</html>
+            </div>
+        </form>
+    </div>
+</div>
+@endsection
