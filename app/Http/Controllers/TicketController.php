@@ -9,18 +9,32 @@ use Illuminate\Support\Facades\DB;
 
 class TicketController extends Controller
 {
-    public function index()
+public function index()
+
 {
-    // ambil semua ticket terbaru dulu
-    $tickets = Ticket::orderBy('created_at', 'desc')->get();
+    $uslognm = Auth::user()->USLOGNM ?? null;
+
+    $user = \App\Models\USERLOG_ID::where('USERLOGNM', $uslognm)->first();
+    $userId = $user?->ID;
+
+    if (!$userId) {
+        return back()->with('error', 'User tidak ditemukan di USERLOG_ID');
+    }
+
+    $tickets = Ticket::where('user_id', $userId)
+        ->orderBy('created_at', 'desc')
+        ->get();
 
     return view('tickets.index', compact('tickets'));
-}
 
-public function show(Ticket $ticket)
-{
+    }
+
+    public function show(Ticket $ticket)
+
+    {
     return view('tickets.show', compact('ticket'));
-}
+
+    }
 
     public function create()
     {
@@ -86,4 +100,43 @@ public function show(Ticket $ticket)
 
         return view('dashboard', compact('tickets'));
     }
+
+
+public function editStatus(Ticket $ticket)
+{
+    // biar user cuma bisa edit tiket dia sendiri
+    $uslognm = Auth::user()->USLOGNM ?? null;
+    $user = \App\Models\USERLOG_ID::where('USERLOGNM', $uslognm)->first();
+    $userId = $user?->ID;
+
+    if ($ticket->user_id != $userId) {
+        abort(403);
+    }
+
+    return view('tickets.edit', compact('ticket'));
+}
+
+public function updateStatus(Request $request, Ticket $ticket)
+
+{
+    $uslognm = Auth::user()->USLOGNM ?? null;
+    $user = \App\Models\USERLOG_ID::where('USERLOGNM', $uslognm)->first();
+    $userId = $user?->ID;
+
+    if ($ticket->user_id != $userId) {
+        abort(403);
+    }
+
+    $request->validate([
+        'status' => 'required|string',
+    ]);
+
+    $ticket->update([
+        'status' => $request->status,
+    ]);
+
+    return redirect()->route('tickets.index')->with('success', 'Status berhasil diupdate');
+
+    }
+
 }

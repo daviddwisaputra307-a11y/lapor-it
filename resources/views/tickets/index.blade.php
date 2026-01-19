@@ -12,7 +12,7 @@
     </div>
 
     {{-- Card --}}
-    <div class="bg-white shadow-sm rounded-xl overflow-hidden border border-gray-200">
+    <div class="bg-white shadow-sm rounded-xl border border-gray-200">
     <div class="overflow-x-auto">
     <table class="w-full table-fixed text-sm">
     <thead class="bg-gray-50 text-gray-700">
@@ -22,7 +22,8 @@
         <th class="w-28 text-left px-6 py-3 font-semibold">Lokasi</th>
         <th class="w-28 text-left px-6 py-3 font-semibold">Status</th>
         <th class="w-44 text-left px-6 py-3 font-semibold">Tanggal</th>
-        <th class="w-24 text-left px-6 py-3 font-semibold">Aksi</th>
+        <th class="w-40 min-w-[160px] text-left px-6 py-3 font-semibold">Aksi</th>
+
       </tr>
     </thead>
           <tbody class="divide-y divide-gray-200">
@@ -55,13 +56,18 @@
                 <td class="px-6 py-4 text-gray-700">
                   {{ optional($ticket->created_at)->format('Y-m-d H:i') ?? '-' }}
                 </td>
-
-                <td class="px-6 py-4">
-                  <a href="{{ route('tickets.show', $ticket->id) }}"
-                     class="inline-flex items-center px-3 py-1.5 rounded-lg bg-gray-800 text-white hover:bg-gray-900">
-                    Detail
-                  </a>
-                </td>
+                <td class="px-4 py-2 text-center whitespace-nowrap">
+                <div class="flex justify-center gap-2">
+                <a href="{{ route('tickets.show', $ticket->id) }}"
+                class="inline-flex items-center justify-center px-3 py-1 rounded !bg-gray-700 !text-white text-sm font-semibold">
+                Detail
+              </a>
+                <a href="{{ route('tickets.editStatus', $ticket->id) }}"
+              class="px-3 py-1 rounded bg-red-600 text-white text-sm inline-block">
+              Edit
+            </a>
+          </div>
+        </td>
               </tr>
             @empty
               <tr>
