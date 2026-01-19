@@ -76,17 +76,24 @@ Route::middleware(['auth'])->group(function () {
     // });
 
     /*
-    |--------------------------------------------------------------------------
-    | USER TICKETS (UMUM)
-    |--------------------------------------------------------------------------
+    |-----------------------------------------------------------------------
+    |    USER TICKETS (UMUM)
+    |----------------------------------------------------------------------
     */
     Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
     Route::get('/tickets/create', [TicketController::class, 'create'])->name('tickets.create');
     Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
 
+
     // DETAIL TIKET
+
     Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
 
+
+    // EDIT STATUS (USER)
+
+    Route::get('/tickets/{ticket}/edit-status', [TicketController::class, 'editStatus'])->name('tickets.editStatus');
+    Route::put('/tickets/{ticket}/update-status', [TicketController::class, 'updateStatus'])->name('tickets.updateStatus');
     /*
     |--------------------------------------------------------------------------
     | CATEGORIES
