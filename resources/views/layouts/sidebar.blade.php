@@ -30,26 +30,32 @@
 
         {{-- BUAT LAPORAN --}}
         <a href="{{ route('tickets.create') }}"
-           class="block px-3 py-2 rounded hover:bg-slate-800
+            class="block px-3 py-2 rounded hover:bg-slate-800
            {{ request()->routeIs('tickets.create') ? 'bg-slate-800' : '' }}">
             ➕ Buat Laporan
         </a>
 
         {{-- RIWAYAT TIKET --}}
         <a href="{{ route('tickets.index') }}"
-           class="block px-3 py-2 rounded hover:bg-slate-800
+            class="block px-3 py-2 rounded hover:bg-slate-800
            {{ request()->routeIs('tickets.index') || request()->routeIs('tickets.show') ? 'bg-slate-800' : '' }}">
             🧾 Riwayat Tiket
         </a>
 
         {{-- ADMIN MENU --}}
-        @if($role === 'admin')
+        @if ($role === 'admin')
             <div class="text-xs uppercase tracking-widest text-slate-400 px-3 mt-4">Admin</div>
 
             <a href="{{ route('admin.tickets.index') }}"
-               class="block px-3 py-2 rounded hover:bg-slate-800
+                class="block px-3 py-2 rounded hover:bg-slate-800
                {{ request()->routeIs('admin.tickets.*') ? 'bg-slate-800' : '' }}">
                 🗂️ Tiket Admin
+            </a>
+
+            {{-- MENU CATEGORIES --}}
+            <a href="{{ route('categories.index') }}"
+                class="block px-3 py-2 rounded hover:bg-slate-800 {{ request()->routeIs('categories.*') ? 'bg-slate-800' : '' }}">
+                📂 Kelola Kategori
             </a>
         @endif
 

@@ -13,7 +13,7 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    @if(Auth::user()->role == 'admin')
+                    @if(Auth::user()->USERLOG_ROLES == 'admin')
                     <div class="hidden sm:flex sm:items-center sm:ml-6">
                         <x-dropdown align="right" width="48">
                             <x-slot name="trigger">
@@ -94,7 +94,7 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
-            @if(Auth::user()->role == 'admin')
+            @if(Auth::user()->USERLOG_ROLES == 'admin')
                 <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.*')">
                     {{ __('Master Data User') }}
                 </x-responsive-nav-link>
