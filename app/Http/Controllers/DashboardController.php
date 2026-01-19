@@ -12,7 +12,7 @@ class DashboardController extends Controller
         $user = Auth::user();
         if (!$user) return redirect()->route('login');
 
-        $role = $user->role ?? 'user'; 
+        $role = $user->role ?? 'user';
 
         if (($user->role ?? '') === 'admin') {
             return redirect()->route('dashboard.admin');
@@ -39,22 +39,31 @@ class DashboardController extends Controller
 
     public function teknisi()
     {
-        $userId = Auth::id();
+        $uslognm = Auth::user()->USLOGNM ?? null;
+        if (!$uslognm) return redirect()->route('login');
 
-        // kalau belum ada teknisi_id di tabel tickets, ganti/skip bagian ini
-        $total = Ticket::where('teknisi_id', $userId)->count();
-        $open  = Ticket::where('teknisi_id', $userId)->where('status', 'Open')->count();
-        $prog  = Ticket::where('teknisi_id', $userId)->where('status', 'On Progress')->count();
-        $done  = Ticket::where('teknisi_id', $userId)->where('status', 'Done')->count();
+        // Ambil ID teknisi dari USERLOG_ID
+        $teknisi = \App\Models\USERLOG_ID::where('USERLOGNM', $uslognm)->first();
+        $teknisiId = $teknisi->ID ?? null;
 
-        $tickets = Ticket::where('teknisi_id', $userId)->latest()->limit(10)->get();
+        $total = Ticket::where('teknisi_id', $teknisiId)->count();
+        $open  = Ticket::where('teknisi_id', $teknisiId)->where('status', 'Open')->count();
+        $prog  = Ticket::where('teknisi_id', $teknisiId)->where('status', 'On Progress')->count();
+        $done  = Ticket::where('teknisi_id', $teknisiId)->where('status', 'Done')->count();
+
+        $tickets = Ticket::where('teknisi_id', $teknisiId)->latest()->limit(10)->get();
 
         return view('dashboard.teknisi', compact('total','open','prog','done','tickets'));
     }
 
     public function user()
     {
-        $userId = Auth::id();
+        $uslognm = Auth::user()->USLOGNM ?? null;
+        if (!$uslognm) return redirect()->route('login');
+
+        // Ambil ID user dari USERLOG_ID
+        $user = \App\Models\USERLOG_ID::where('USERLOGNM', $uslognm)->first();
+        $userId = $user->ID ?? null;
 
         $total = Ticket::where('user_id', $userId)->count();
         $open  = Ticket::where('user_id', $userId)->where('status', 'Open')->count();

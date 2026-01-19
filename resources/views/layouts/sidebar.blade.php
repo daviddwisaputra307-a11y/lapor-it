@@ -10,11 +10,16 @@
 
     {{-- USER INFO --}}
     <div class="px-6 py-4 border-b border-slate-700">
-        <div class="text-sm font-semibold">{{ Auth::user()->name ?? '-' }}</div>
-        <div class="text-xs text-slate-300">{{ Auth::user()->email ?? '-' }}</div>
+        @php
+            $uslognm = Auth::user()->USLOGNM ?? null;
+            $userlogid = $uslognm ? \App\Models\USERLOG_ID::where('USERLOGNM', $uslognm)->first() : null;
+            $role = \App\Models\USERLOG_ROLES::where('USERLOGNM', $uslognm)->value('USERLOG_ROLES') ?? 'user';
+        @endphp
+        <div class="text-sm font-semibold">{{ $userlogid->USERLOGNM ?? '-' }}</div>
+        <div class="text-xs text-slate-300">{{ $userlogid->KETERANGAN ?? '-' }}</div>
 
         <div class="text-[11px] mt-2 inline-block px-2 py-1 rounded bg-slate-800 text-slate-200">
-            Role: {{ Auth::user()->role ?? 'user' }}
+            Role: {{ $role }}
         </div>
     </div>
 
@@ -38,7 +43,7 @@
         </a>
 
         {{-- ADMIN MENU --}}
-        @if((Auth::user()->role ?? 'user') === 'admin')
+        @if($role === 'admin')
             <div class="text-xs uppercase tracking-widest text-slate-400 px-3 mt-4">Admin</div>
 
             <a href="{{ route('admin.tickets.index') }}"

@@ -9,11 +9,11 @@
     <form method="POST" action="{{ route('login') }}">
         @csrf
 
-        <!-- Email Address -->
+        <!-- Username -->
         <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+            <x-input-label for="uslognm" :value="__('Username')" />
+            <x-text-input id="uslognm" class="block mt-1 w-full" type="text" name="uslognm" :value="old('uslognm')" required autofocus autocomplete="username" />
+            <x-input-error :messages="$errors->get('uslognm')" class="mt-2" />
         </div>
 
         <!-- Password -->
@@ -43,9 +43,7 @@
             </a>
         @endif
 
-        <a class="underline text-sm text-gray-600 hover:text-gray-900 ml-4" href="{{ route('register') }}">
-            Belum punya akun? Daftar
-        </a>
+
 
         <x-primary-button class="ml-3 whitespace-nowrap w-auto px-6">
             {{ __('Log in') }}

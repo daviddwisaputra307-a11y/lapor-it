@@ -27,7 +27,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            'uslognm' => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
     }
@@ -41,15 +41,17 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
-
+        $user = \App\Models\USERLOG::where('USLOGNM', $this->uslognm)->first();
+        if (!$user || $user->USPASS !== $this->password) {
+            \Illuminate\Support\Facades\RateLimiter::hit($this->throttleKey());
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'uslognm' => trans('auth.failed'),
             ]);
         }
 
-        RateLimiter::clear($this->throttleKey());
+        // Login manual tanpa Auth::attempt
+        \Illuminate\Support\Facades\Auth::login($user, $this->boolean('remember'));
+        \Illuminate\Support\Facades\RateLimiter::clear($this->throttleKey());
     }
 
     /**
@@ -80,6 +82,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+        return Str::transliterate(Str::lower($this->string('uslognm')).'|'.$this->ip());
     }
 }

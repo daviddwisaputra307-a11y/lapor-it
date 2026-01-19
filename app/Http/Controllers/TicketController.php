@@ -41,8 +41,11 @@ public function show(Ticket $ticket)
             'lokasi' => ['required', 'string'], // ini KODEBAGIAN dari dropdown
         ]);
 
+        $uslognm = Auth::user()->USLOGNM ?? null;
+        $user = \App\Models\USERLOG_ID::where('USERLOGNM', $uslognm)->first();
+        $userId = $user->ID ?? null;
         Ticket::create([
-            'user_id' => Auth::id(),
+            'user_id' => $userId,
             'judul' => $validated['judul'],
             'deskripsi' => $validated['deskripsi'],
             'lokasi' => $validated['lokasi'], // simpan KODEBAGIAN
@@ -62,15 +65,21 @@ public function show(Ticket $ticket)
 
         } elseif ($user->role == 'teknisi') {
             // 2. TEKNISI: Hanya melihat tiket yang DITUGASKAN kepadanya
+            $uslognm = $user->USLOGNM ?? null;
+            $teknisi = \App\Models\USERLOG_ID::where('USERLOGNM', $uslognm)->first();
+            $teknisiId = $teknisi->ID ?? null;
             $tickets = \App\Models\Ticket::with('user')
-                            ->where('teknisi_id', $user->id) // Filter berdasarkan ID Teknisi
+                            ->where('teknisi_id', $teknisiId) // Filter berdasarkan ID Teknisi
                             ->latest()
                             ->get();
 
         } else {
             // 3. USER: Hanya melihat tiket buatan SENDIRI
+            $uslognm = $user->USLOGNM ?? null;
+            $userData = \App\Models\USERLOG_ID::where('USERLOGNM', $uslognm)->first();
+            $userId = $userData->ID ?? null;
             $tickets = \App\Models\Ticket::with('user')
-                            ->where('user_id', $user->id)
+                            ->where('user_id', $userId)
                             ->latest()
                             ->get();
         }
