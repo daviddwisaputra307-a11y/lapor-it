@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-slot name="header">
+<x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Dashboard Pelaporan IT') }}
@@ -8,6 +8,7 @@
                 + Buat Laporan Baru
             </a>
         </div>
+
     </x-slot>
 
     <div class="py-12">
@@ -21,7 +22,7 @@
             @endif
 
             <div class="mb-4 text-gray-600 dark:text-gray-400 px-2">
-                Login sebagai: <span class="font-bold text-blue-600 uppercase">{{ Auth::user()->role }}</span>
+                Login sebagai: <span class="font-bold text-blue-600 uppercase">{{ Auth::user()->USERLOG_ROLES }}</span>
             </div>
 
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
@@ -40,7 +41,7 @@
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pelapor</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Judul Masalah</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                        @if(Auth::user()->role == 'admin' || Auth::user()->role == 'teknisi')
+                                        @if(Auth::user()->USERLOG_ROLES == 'admin' || Auth::user()->USERLOG_ROLES == 'teknisi')
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi (Teknisi)</th>
                                         @endif
                                     </tr>
@@ -63,7 +64,7 @@
                                             </span>
                                         </td>
 
-                                        @if(Auth::user()->role == 'admin' || Auth::user()->role == 'teknisi')
+                                        @if(Auth::user()->USERLOG_ROLES == 'admin' || Auth::user()->USERLOG_ROLES == 'teknisi')
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <a href="{{ route('tickets.edit', $ticket->id) }}" class="text-indigo-600 hover:text-indigo-900 bg-indigo-100 px-3 py-1 rounded-md">
                                                     Update Status
@@ -76,7 +77,6 @@
                             </table>
                         </div>
                     @endif
-
                 </div>
             </div>
         </div>
