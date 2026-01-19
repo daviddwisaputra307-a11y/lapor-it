@@ -1,16 +1,9 @@
-<!doctype html>
-<html lang="id">
+@extends('layouts.app')
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Kelola Kategori</title>
+@section('title', 'Categories')
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-
-<body class="bg-slate-100 font-sans p-8">
-    <div class="max-w-[1000px] mx-auto">
+@section('content')
+    <div class="max-w-full mx-auto">
 
         <!-- Header -->
         <div class="flex items-center justify-between mb-4">
@@ -58,28 +51,24 @@
                         <tr class="bg-slate-50">
                             <th class="px-3 py-3 text-left text-sm font-semibold border-b">No</th>
                             <th class="px-3 py-3 text-left text-sm font-semibold border-b">Nama Kategori</th>
-                            <th class="px-3 py-3 text-left text-sm font-semibold border-b">Deskripsi</th>
-                            <th class="px-3 py-3 text-left text-sm font-semibold border-b">Dibuat</th>
-                            <th class="px-3 py-3 text-left text-sm font-semibold border-b">Aksi</th>
+                            <th class="px-3 py-3 text-center text-sm font-semibold border-b">Deskripsi</th>
+                            <th class="px-3 py-3 text-right text-sm font-semibold border-b">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($categories as $cat)
-                            <tr class="border-b last:border-b-0">
+                            <tr class="border-b last:border-b-0 hover:bg-slate-100">
                                 <td class="px-3 py-3 text-sm">
                                     {{ $loop->iteration + ($categories->currentPage() - 1) * $categories->perPage() }}
                                 </td>
                                 <td class="px-3 py-3 text-sm font-semibold">
                                     {{ $cat->nama_kategori }}
                                 </td>
-                                <td class="px-3 py-3 text-sm">
+                                <td class="px-3 py-3 text-sm {{ $cat->deskripsi ? 'text-left' : 'text-center' }}">
                                     {{ $cat->deskripsi ?? '-' }}
                                 </td>
-                                <td class="px-3 py-3 text-sm">
-                                    {{ $cat->created_at?->format('d/m/Y H:i') ?? '-' }}
-                                </td>
-                                <td class="px-3 py-3">
-                                    <div class="flex gap-2">
+                                <td class="px-3 py-3 text-right">
+                                    <div class="flex justify-end gap-2">
                                         <!-- Edit -->
                                         <a href="{{ route('categories.edit', $cat->id) }}"
                                             class="px-3 py-1.5 text-xs rounded-xl border border-blue-600 text-blue-700 bg-white hover:bg-blue-600 hover:text-white transition">
@@ -110,6 +99,4 @@
             @endif
         </div>
     </div>
-</body>
-
-</html>
+@endsection

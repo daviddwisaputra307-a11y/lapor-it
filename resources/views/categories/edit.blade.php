@@ -1,15 +1,8 @@
-<!doctype html>
-<html lang="id">
+@extends('layouts.app')
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Edit Kategori</title>
+@section('title', 'Categories')
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-
-<body class="bg-slate-100 font-sans p-8">
+@section('content')
     <div class="max-w-[600px] mx-auto">
 
         <!-- Header -->
@@ -35,10 +28,7 @@
                     <input type="text" id="nama_kategori" name="nama_kategori"
                         value="{{ old('nama_kategori', $category->nama_kategori) }}"
                         placeholder="Contoh: Hardware, Software, Network" autofocus required
-                        class="w-full px-3 py-2 text-sm rounded-lg
-                                  border border-slate-300
-                                  focus:outline-none focus:ring-4
-                                  focus:ring-blue-100 focus:border-blue-600">
+                        class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-600">
 
                     @error('nama_kategori')
                         <div class="mt-1 text-xs text-red-600">
@@ -54,10 +44,9 @@
                     </label>
 
                     <textarea id="deskripsi" name="deskripsi" placeholder="Deskripsi singkat tentang kategori ini..."
-                        class="w-full min-h-[100px] px-3 py-2 text-sm rounded-lg
-                                     border border-slate-300 resize-y
-                                     focus:outline-none focus:ring-4
-                                     focus:ring-blue-100 focus:border-blue-600">{{ old('deskripsi', $category->deskripsi) }}</textarea>
+                        class="w-full min-h-[100px] px-3 py-2 text-sm rounded-lg border border-slate-300 resize-y focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-600">
+                        {{ old('deskripsi', $category->deskripsi) }}
+                    </textarea>
 
                     @error('deskripsi')
                         <div class="mt-1 text-xs text-red-600">
@@ -70,25 +59,17 @@
                 <div class="flex gap-3 mt-5">
                     <!-- Primary -->
                     <button type="submit"
-                        class="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-xl
-                                   border border-blue-600 text-blue-700 bg-white
-                                   hover:bg-blue-600 hover:text-white
-                                   transition">
+                        class="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-xl border border-blue-600 text-blue-700 bg-white hover:bg-blue-600 hover:text-white transition">
                         Update Kategori
                     </button>
 
                     <!-- Secondary -->
                     <a href="{{ route('categories.index') }}"
-                        class="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-xl
-                              border border-slate-300 text-slate-600 bg-white
-                              hover:bg-slate-200
-                              transition">
+                        class="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-xl border border-slate-300 text-slate-600 bg-white hover:bg-slate-200 transition">
                         Batal
                     </a>
                 </div>
             </form>
         </div>
     </div>
-</body>
-
-</html>
+@endsection
