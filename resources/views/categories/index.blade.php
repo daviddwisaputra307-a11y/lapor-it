@@ -9,7 +9,7 @@
         <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-3">
                 <!-- Back Button -->
-                <a href="{{ route('dashboard') }}"
+                <a href="{{ url()->previous() }}"
                     class="inline-flex items-center px-3 py-1.5 text-sm rounded-xl border border-slate-300 text-slate-600 bg-white hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 transition">
                     ← Kembali
                 </a>
