@@ -1,74 +1,91 @@
-<!doctype html>
-<html lang="id">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin - Daftar Tiket</title>
-  <style>
-    body{font-family:Arial, sans-serif;background:#f6f7fb;margin:0;padding:30px;}
-    .wrap{max-width:1000px;margin:0 auto;}
-    .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
-    .card{background:#fff;border:1px solid #e6e8f0;border-radius:12px;padding:16px;}
-    table{width:100%;border-collapse:collapse;}
-    th,td{padding:12px;border-bottom:1px solid #eee;text-align:left;font-size:14px;}
-    th{background:#fafafa;font-weight:700;}
-    .badge{padding:4px 10px;border-radius:999px;font-size:12px;border:1px solid #ddd;display:inline-block;}
-    .btn{display:inline-block;padding:8px 12px;border-radius:10px;background:#2563eb;color:#fff;text-decoration:none;font-size:13px;}
-    .muted{color:#6b7280;font-size:13px;}
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <div class="top">
-      <div>
-        <h2 style="margin:0;">🛠️ Admin - Semua Tiket</h2>
-        <div class="muted">Lihat semua tiket, cek detail, assign teknisi, ubah status.</div>
-      </div>
-    <div style="display:flex; gap:8px;">
-    <a class="btn" href="{{ route('dashboard.admin') }}">
-        ← Dashboard Admin
-    </a>
+@extends('layouts.app')
 
-    <a class="btn" href="{{ route('tickets.index') }}">
-        Ke User List
-    </a>
-  </div>
+@section('title', 'Admin - Semua Tiket')
+
+@section('content')
+    <div class=" bg-slate-100 p-6">
+        <div class="max-w-5xl mx-auto space-y-4">
+
+            <!-- Header -->
+            <div class="flex items-start justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold">
+                        🛠️ Admin - Semua Tiket
+                    </h2>
+                    <p class="text-sm text-slate-500">
+                        Lihat semua tiket, cek detail, assign teknisi, ubah status.
+                    </p>
+                </div>
+
+                <div class="flex gap-2">
+                    <a href="{{ route('dashboard.admin') }}"
+                        class="px-3 py-1.5 text-sm rounded-xl border border-slate-300 text-slate-700 bg-white hover:bg-slate-800 hover:text-white transition">
+                        ← Dashboard Admin
+                    </a>
+
+                    <a href="{{ route('tickets.index') }}"
+                        class="px-3 py-1.5 text-sm rounded-xl border border-blue-600 text-blue-700 bg-white hover:bg-blue-600 hover:text-white transition">
+                        Ke User List
+                    </a>
+                </div>
+            </div>
+
+            <!-- Card -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-4">
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50">
+                                <th class="px-3 py-3 text-left text-sm font-semibold border-b">No Tiket</th>
+                                <th class="px-3 py-3 text-left text-sm font-semibold border-b">Judul</th>
+                                <th class="px-3 py-3 text-left text-sm font-semibold border-b">Lokasi</th>
+                                <th class="px-3 py-3 text-left text-sm font-semibold border-b">Prioritas</th>
+                                <th class="px-3 py-3 text-left text-sm font-semibold border-b">Status</th>
+                                <th class="px-3 py-3 text-left text-sm font-semibold border-b">Teknisi</th>
+                                <th class="px-3 py-3 text-right text-sm font-semibold border-b">Aksi</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach ($tickets as $t)
+                                <tr class="border-b last:border-b-0 hover:bg-slate-50 transition">
+                                    <td class="px-3 py-3 text-sm">{{ $t->nomor_tiket }}</td>
+                                    <td class="px-3 py-3 text-sm font-medium">{{ $t->judul }}</td>
+                                    <td class="px-3 py-3 text-sm">{{ $t->lokasi }}</td>
+
+                                    <td class="px-3 py-3 text-sm">
+                                        <span
+                                            class="inline-flex px-3 py-0.5 text-xs rounded-full border border-slate-300 text-slate-700 bg-white">
+                                            {{ $t->prioritas ?? '-' }}
+                                        </span>
+                                    </td>
+
+                                    <td class="px-3 py-3 text-sm">
+                                        <span
+                                            class="inline-flex px-3 py-0.5 text-xs rounded-full border border-slate-300 text-slate-700 bg-white">
+                                            {{ $t->status }}
+                                        </span>
+                                    </td>
+
+                                    <td class="px-3 py-3 text-sm">{{ $t->teknisi ?? '-' }}</td>
+
+                                    <td class="px-3 py-3 text-right">
+                                        <a href="{{ route('admin.tickets.show', $t->id) }}"
+                                            class="inline-flex px-3 py-1.5 text-xs rounded-xl border border-blue-600 text-blue-700 bg-white hover:bg-blue-600 hover:text-white transition">
+                                            Detail
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="mt-4">
+                    {{ $tickets->links() }}
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="card">
-      <table>
-        <thead>
-          <tr>
-            <th>No Tiket</th>
-            <th>Judul</th>
-            <th>Lokasi</th>
-            <th>Prioritas</th>
-            <th>Status</th>
-            <th>Teknisi</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody>
-          @foreach($tickets as $t)
-            <tr>
-              <td>{{ $t->nomor_tiket }}</td>
-              <td>{{ $t->judul }}</td>
-              <td>{{ $t->lokasi }}</td>
-              <td><span class="badge">{{ $t->prioritas ?? '-' }}</span></td>
-              <td><span class="badge">{{ $t->status }}</span></td>
-              <td>{{ $t->teknisi ?? '-' }}</td>
-              <td>
-                <a class="btn" href="{{ route('admin.tickets.show', $t->id) }}"> Detail</a>
-              </td>
-            </tr>
-          @endforeach
-        </tbody>
-      </table>
-
-      <div style="margin-top:14px;">
-        {{ $tickets->links() }}
-      </div>
-    </div>
-  </div>
-</body>
-</html>
+@endsection

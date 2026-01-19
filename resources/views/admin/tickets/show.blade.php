@@ -1,160 +1,169 @@
 {{-- resources/views/admin/tickets/show.blade.php --}}
-@extends('layouts.admin')
+@extends('layouts.app')
 
 @section('title', 'Detail Ticket (Admin)')
 
 @section('content')
-<style>
-  .wrap{max-width:1100px;margin:0 auto}
-  .row{display:flex;gap:16px;flex-wrap:wrap}
-  .col{flex:1;min-width:320px}
+    @php
+        $st = $ticket->status ?? '-';
+        $statusChip = match ($st) {
+            'Open' => 'bg-blue-100 text-blue-700 border-blue-200',
+            'On Progress' => 'bg-amber-100 text-amber-700 border-amber-200',
+            'Done' => 'bg-green-100 text-green-700 border-green-200',
+            'Cancel' => 'bg-red-100 text-red-700 border-red-200',
+            default => 'bg-slate-100 text-slate-700 border-slate-200',
+        };
 
-  .card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:18px;box-shadow:0 8px 20px rgba(15,23,42,.06)}
-  .title{font-size:22px;font-weight:800;margin:0}
-  .muted{color:#64748b;font-size:13px;margin-top:6px}
+        $pr = $ticket->prioritas ?? '-';
+        $prioChip = match ($pr) {
+            'Low' => 'bg-slate-100 text-slate-700 border-slate-200',
+            'Medium' => 'bg-sky-100 text-sky-700 border-sky-200',
+            'High' => 'bg-amber-100 text-amber-700 border-amber-200',
+            'Urgent' => 'bg-red-100 text-red-700 border-red-200',
+            default => 'bg-slate-100 text-slate-700 border-slate-200',
+        };
+    @endphp
 
-  .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:13px;font-weight:800;border:1px solid transparent}
-  .chip-blue{background:#dbeafe;color:#1d4ed8;border-color:#bfdbfe}
-  .chip-sky{background:#e0f2fe;color:#075985;border-color:#bae6fd}
-  .chip-amber{background:#fef3c7;color:#92400e;border-color:#fde68a}
-  .chip-green{background:#dcfce7;color:#166534;border-color:#bbf7d0}
-  .chip-red{background:#fee2e2;color:#991b1b;border-color:#fecaca}
-  .chip-slate{background:#f1f5f9;color:#334155;border-color:#e2e8f0}
+    <div class="max-w-6xl mx-auto space-y-4">
 
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:10px;font-weight:900;text-decoration:none;border:1px solid transparent;cursor:pointer}
-  .btn-blue{background:#2563eb;color:#fff;border-color:#2563eb}
-  .btn-blue:hover{filter:brightness(.95)}
-  .btn-outline{background:#fff;color:#2563eb;border-color:#2563eb}
-  .btn-outline:hover{background:#eff6ff}
+        {{-- Header --}}
+        <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+                <h1 class="text-xl font-extrabold">Detail Ticket (Admin)</h1>
+                <p class="text-sm text-slate-500"></p>
+            </div>
 
-  label{display:block;font-size:13px;color:#475569;margin:10px 0 6px}
-  select,input,textarea{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:10px;background:#fff}
-  textarea{min-height:90px;resize:vertical}
-</style>
+            <a href="{{ route('admin.tickets.index') }}"
+                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-blue-600 text-blue-700 bg-white hover:bg-blue-600 hover:text-white transition text-sm font-semibold">
+                ← Kembali
+            </a>
+        </div>
 
-@php
-  $st = $ticket->status ?? '-';
-  $statusChip = match($st){
-    'Open' => 'chip-blue',
-    'On Progress' => 'chip-amber',
-    'Done' => 'chip-green',
-    'Cancel' => 'chip-red',
-    default => 'chip-slate'
-  };
+        {{-- Alert --}}
+        @if (session('success'))
+            <div
+                class="bg-emerald-50 border border-emerald-200 text-emerald-800
+                    px-4 py-2 rounded-xl text-sm">
+                {{ session('success') }}
+            </div>
+        @endif
 
-  $pr = $ticket->prioritas ?? '-';
-  $prioChip = match($pr){
-    'Low' => 'chip-slate',
-    'Medium' => 'chip-sky',
-    'High' => 'chip-amber',
-    'Urgent' => 'chip-red',
-    default => 'chip-slate'
-  };
-@endphp
+        {{-- Badges --}}
+        <div class="flex flex-wrap gap-2">
+            <span
+                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700 border border-blue-200">
+                No: {{ $ticket->nomor_tiket ?? '-' }}
+            </span>
 
-<div class="wrap">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border {{ $statusChip }}">
+                Status: {{ $st }}
+            </span>
 
-  {{-- Header --}}
-  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
-    <div>
-      <h1 class="title">Detail Ticket (Admin)</h1>
-      <div class="muted"></div>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border {{ $prioChip }}">
+                Prioritas: {{ $pr }}
+            </span>
+
+            <span
+                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-sky-100 text-sky-700 border border-sky-200">
+                Teknisi: {{ $ticket->teknisi ?? '-' }}
+            </span>
+        </div>
+
+        {{-- Content --}}
+        <div class="flex flex-wrap gap-4">
+
+            {{-- Kiri --}}
+            <div
+                class="flex-1 min-w-[320px] bg-white border border-slate-200 rounded-2xl
+                    p-5 shadow-[0_8px_20px_rgba(15,23,42,0.06)]">
+                <div class="font-extrabold mb-3">Informasi Ticket</div>
+
+                <label class="block text-xs text-slate-600 mb-1">Tanggal</label>
+                <input readonly class="w-full px-3 py-2 mb-3 rounded-xl border border-slate-300 bg-white text-sm"
+                    value="{{ $ticket->created_at?->format('Y-m-d H:i:s') ?? '-' }}">
+
+                <label class="block text-xs text-slate-600 mb-1">Lokasi</label>
+                <input readonly class="w-full px-3 py-2 mb-3 rounded-xl border border-slate-300 bg-white text-sm"
+                    value="{{ $ticket->lokasi ?? '-' }}">
+
+                <label class="block text-xs text-slate-600 mb-1">Judul</label>
+                <input readonly class="w-full px-3 py-2 mb-3 rounded-xl border border-slate-300 bg-white text-sm"
+                    value="{{ $ticket->judul ?? '-' }}">
+
+                <label class="block text-xs text-slate-600 mb-1">Deskripsi</label>
+                <textarea readonly class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm min-h-[90px]">{{ $ticket->deskripsi ?? '-' }}</textarea>
+            </div>
+
+            {{-- Kanan --}}
+            <div class="flex-1 min-w-[320px] flex flex-col gap-4">
+
+                {{-- Assign Teknisi --}}
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-[0_8px_20px_rgba(15,23,42,0.06)]">
+                    <div class="font-extrabold mb-3">Assign Teknisi</div>
+
+                    <form method="POST" action="{{ route('admin.tickets.assign', $ticket->id) }}" class="space-y-3">
+                        @csrf
+
+                        <div>
+                            <label class="block text-xs text-slate-600 mb-1">Pilih teknisi</label>
+                            <select name="teknisi" required
+                                class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                                <option value="">-- pilih --</option>
+                                @foreach ($teknisiList ?? [] as $t)
+                                    <option value="{{ $t }}" @selected($ticket->teknisi === $t)>
+                                        {{ $t }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <button type="submit"
+                            class="w-full px-4 py-2 rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition">
+                            Simpan Teknisi
+                        </button>
+                    </form>
+                </div>
+
+                {{-- Update Status --}}
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-[0_8px_20px_rgba(15,23,42,0.06)]">
+                    <div class="font-extrabold mb-3">Update Status / Prioritas</div>
+
+                    <form method="POST" action="{{ route('admin.tickets.status', $ticket->id) }}" class="space-y-3">
+                        @csrf
+
+                        <div>
+                            <label class="block text-xs text-slate-600 mb-1">Status</label>
+                            <select name="status" required
+                                class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                                @foreach (['Open', 'On Progress', 'Done', 'Cancel'] as $s)
+                                    <option value="{{ $s }}" @selected($ticket->status === $s)>
+                                        {{ $s }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs text-slate-600 mb-1">Prioritas</label>
+                            <select name="prioritas"
+                                class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm">
+                                <option value="">-- pilih --</option>
+                                @foreach (['Low', 'Medium', 'High', 'Urgent'] as $p)
+                                    <option value="{{ $p }}" @selected($ticket->prioritas === $p)>
+                                        {{ $p }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <button type="submit"
+                            class="w-full px-4 py-2 rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition">
+                            Update
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
     </div>
-
-    <a href="{{ route('admin.tickets.index') }}" class="btn btn-outline">← Kembali</a>
-  </div>
-
-  {{-- Alert --}}
-  @if(session('success'))
-    <div style="background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;padding:10px 12px;border-radius:12px;margin-bottom:12px;">
-      {{ session('success') }}
-    </div>
-  @endif
-
-  {{-- Badges --}}
-  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
-    <span class="chip chip-blue">No: {{ $ticket->nomor_tiket ?? '-' }}</span>
-    <span class="chip {{ $statusChip }}">Status: {{ $st }}</span>
-    <span class="chip {{ $prioChip }}">Prioritas: {{ $pr }}</span>
-    <span class="chip chip-sky">Teknisi: {{ $ticket->teknisi ?? '-' }}</span>
-  </div>
-
-  <div class="row">
-    {{-- KIRI: Info Ticket --}}
-    <div class="col card">
-      <div style="font-weight:900;margin-bottom:10px;">Informasi Ticket</div>
-
-      <label>Tanggal</label>
-      <input value="{{ $ticket->created_at ? $ticket->created_at->format('Y-m-d H:i:s') : '-' }}" readonly>
-
-      <label>Lokasi</label>
-      <input value="{{ $ticket->lokasi ?? '-' }}" readonly>
-
-      <label>Judul</label>
-      <input value="{{ $ticket->judul ?? '-' }}" readonly>
-
-      <label>Deskripsi</label>
-      <textarea readonly>{{ $ticket->deskripsi ?? '-' }}</textarea>
-    </div>
-
-    {{-- KANAN: Aksi --}}
-    <div class="col" style="display:flex;flex-direction:column;gap:16px;">
-
-      {{-- Assign Teknisi --}}
-      <div class="card">
-        <div style="font-weight:900;margin-bottom:10px;">Assign Teknisi</div>
-
-        <form method="POST" action="{{ route('admin.tickets.assign', $ticket->id) }}">
-          @csrf
-
-          <label>Pilih teknisi</label>
-          <select name="teknisi" required>
-            <option value="">-- pilih --</option>
-            @foreach(($teknisiList ?? []) as $t)
-              <option value="{{ $t }}" {{ ($ticket->teknisi === $t) ? 'selected' : '' }}>
-                {{ $t }}
-              </option>
-            @endforeach
-          </select>
-
-          <div style="height:12px;"></div>
-          <button type="submit" class="btn btn-blue" style="width:100%;">Simpan Teknisi</button>
-        </form>
-      </div>
-
-      {{-- Update Status / Prioritas --}}
-      <div class="card">
-        <div style="font-weight:900;margin-bottom:10px;">Update Status / Prioritas</div>
-
-        <form method="POST" action="{{ route('admin.tickets.status', $ticket->id) }}">
-          @csrf
-
-          <label>Status</label>
-          <select name="status" required>
-            @foreach(['Open','On Progress','Done','Cancel'] as $s)
-              <option value="{{ $s }}" {{ ($ticket->status === $s) ? 'selected' : '' }}>
-                {{ $s }}
-              </option>
-            @endforeach
-          </select>
-
-          <label>Prioritas</label>
-          <select name="prioritas">
-            <option value="">-- pilih --</option>
-            @foreach(['Low','Medium','High','Urgent'] as $p)
-              <option value="{{ $p }}" {{ ($ticket->prioritas === $p) ? 'selected' : '' }}>
-                {{ $p }}
-              </option>
-            @endforeach
-          </select>
-
-          <div style="height:12px;"></div>
-          <button type="submit" class="btn btn-blue" style="width:100%;">Update</button>
-        </form>
-      </div>
-
-    </div>
-  </div>
-
-</div>
 @endsection
