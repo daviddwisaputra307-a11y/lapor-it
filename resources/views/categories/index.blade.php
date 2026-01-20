@@ -71,7 +71,7 @@
                                     <div class="flex justify-end gap-2">
                                         <!-- Edit -->
                                         <a href="{{ route('categories.edit', $cat->id) }}"
-                                            class="px-3 py-1.5 text-xs rounded-xl border border-blue-600 text-blue-700 bg-white hover:bg-blue-600 hover:text-white transition">
+                                            class="px-3 py-1.5 text-xs rounded-xl border border-blue-600 text-blue-700 bg-blue-50 hover:bg-blue-600 hover:text-white transition">
                                             Edit
                                         </a>
 
@@ -81,7 +81,7 @@
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
-                                                class="hidden px-3 py-1.5 text-xs rounded-xl border border-red-600 text-red-700 bg-white hover:bg-red-600 hover:text-white transition">
+                                                class="hidden px-3 py-1.5 text-xs rounded-xl border border-red-600 text-red-700 bg-red-50 hover:bg-red-600 hover:text-white transition">
                                                 Hapus
                                             </button>
                                         </form>

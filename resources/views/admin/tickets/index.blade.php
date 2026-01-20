@@ -52,13 +52,15 @@
                                     <td class="px-4 py-4 text-sm text-gray-600">{{ $t->lokasi }}</td>
 
                                     <td class="px-4 py-4 text-sm">
-                                        <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-bold border border-slate-200 bg-gray-50">
+                                        <span
+                                            class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-bold border border-slate-200 bg-gray-50">
                                             {{ $t->prioritas ?? '-' }}
                                         </span>
                                     </td>
 
                                     <td class="px-4 py-4 text-sm">
-                                        <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-bold border 
+                                        <span
+                                            class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-bold border 
                                             {{ $t->status == 'OPEN' ? 'border-green-200 bg-green-50 text-green-700' : 'border-slate-200 bg-slate-50 text-slate-700' }}">
                                             {{ $t->status }}
                                         </span>
@@ -70,12 +72,12 @@
                                         <div class="flex justify-center gap-2">
                                             {{-- Detail untuk melihat --}}
                                             <a href="{{ route('tickets.show', $t->id) }}"
-                                                class="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-700 text-white hover:bg-black transition">
+                                                class="px-3 py-1.5 text-xs font-bold rounded-lg border border-blue-600 text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white transition">
                                                 Detail
                                             </a>
                                             {{-- Edit untuk Admin mengelola --}}
                                             <a href="{{ route('admin.tickets.show', $t->id) }}"
-                                                class="px-3 py-1.5 text-xs font-bold rounded-lg bg-red-600 text-white hover:bg-red-700 transition">
+                                                class="px-3 py-1.5 text-xs font-bold rounded-lg border border-red-600 text-red-600 bg-red-50 hover:bg-red-600 hover:text-white transition">
                                                 Edit
                                             </a>
                                         </div>
@@ -86,7 +88,7 @@
                     </table>
                 </div>
 
-                @if($tickets->hasPages())
+                @if ($tickets->hasPages())
                     <div class="px-6 py-4 bg-slate-50 border-t">
                         {{ $tickets->links() }}
                     </div>
