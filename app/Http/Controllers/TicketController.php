@@ -128,7 +128,7 @@ public function updateStatus(Request $request, Ticket $ticket)
     }
 
     $request->validate([
-        'status' => 'required|string',
+        'status' => 'required|in:open,closed',
     ]);
 
     $ticket->update([
