@@ -24,7 +24,7 @@ class DashboardController extends Controller
             return redirect()->route('dashboard.admin');
         } elseif ($role == 'teknisi') {
             return redirect()->route('dashboard.teknisi');
-        } else {
+        } elseif ($role == 'user') {
             return redirect()->route('dashboard.user');
         }
     }
@@ -44,7 +44,7 @@ class DashboardController extends Controller
 
         // 1. Ambil role (Gunakan str_contains agar role 'teknisi 2' tetap lolos)
         $role = \App\Models\USERLOG_ROLES::where('USERLOGNM', $uslognm)->value('USERLOG_ROLES');
-        
+
         if (!$role || !str_contains(strtolower($role), 'teknisi')) {
             return redirect()->route('dashboard');
         }
@@ -61,7 +61,7 @@ class DashboardController extends Controller
         // 3. STATISTIK: Cari berdasarkan NAMA STRING
         // Kita gunakan LIKE agar lebih aman terhadap spasi/tipe data SQL Server
         $baseQuery = \App\Models\Ticket::where('teknisi', 'LIKE', '%' . $uslognm . '%');
-        
+
         $total = (clone $baseQuery)->count();
         $open  = (clone $baseQuery)->where('status', 'Open')->count();
         $prog  = (clone $baseQuery)->whereIn('status', ['On Progress', 'In Progress'])->count();

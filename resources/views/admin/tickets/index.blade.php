@@ -15,18 +15,6 @@
                         Kelola seluruh tiket penanganan IT, assign teknisi, dan pantau status.
                     </p>
                 </div>
-
-                <div class="flex gap-2">
-                    <a href="{{ route('dashboard.admin') }}"
-                        class="px-4 py-2 text-sm font-bold rounded-lg border border-slate-300 text-slate-700 bg-white hover:bg-slate-800 hover:text-white transition">
-                        ← Dashboard Admin
-                    </a>
-
-                    <a href="{{ route('tickets.index') }}"
-                        class="px-4 py-2 text-sm font-bold rounded-lg border border-blue-600 text-blue-700 bg-white hover:bg-blue-600 hover:text-white transition">
-                        Ke User List
-                    </a>
-                </div>
             </div>
 
             <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
@@ -60,7 +48,7 @@
 
                                     <td class="px-4 py-4 text-sm">
                                         <span
-                                            class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-bold border 
+                                            class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-bold border
                                             {{ $t->status == 'OPEN' ? 'border-green-200 bg-green-50 text-green-700' : 'border-slate-200 bg-slate-50 text-slate-700' }}">
                                             {{ $t->status }}
                                         </span>

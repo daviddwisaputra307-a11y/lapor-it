@@ -3,9 +3,9 @@
 
     {{-- HEADER --}}
     <div class="px-6 py-5 border-b border-slate-700">
-        <div class="text-lg font-bold tracking-wide">
-            {{ config('app.name', 'LaporIT') }}
-        </div>
+        <a href="/" class="text-lg font-bold tracking-wide">
+            Lapor IT
+        </a>
         <div class="text-xs text-slate-300 mt-1">Menu</div>
     </div>
 
@@ -27,6 +27,11 @@
     {{-- NAV --}}
     <nav class="flex-1 px-3 py-4 space-y-2">
 
+        <a href="/"
+            class="block px-3 py-2 rounded hover:bg-slate-800
+           {{ request()->routeIs('tickets.create') ? 'bg-slate-800' : '' }}">
+            🏠 Dashboard
+        </a>
         <div class="text-xs uppercase tracking-widest text-slate-400 px-3 mt-4">User</div>
 
         {{-- BUAT LAPORAN --}}
@@ -64,7 +69,7 @@
 
     {{-- LOGOUT --}}
     <div class="p-4 border-t">
-        <form method="POST" 
+        <form method="POST"
         action="{{ route('logout') }}">
             @csrf
             <button type="submit"
