@@ -4,61 +4,62 @@ namespace App\Http\Controllers;
 
 use App\Models\Ticket;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AdminTicketController extends Controller
 {
-    //public function __construct()
-    //{
-    //    $this->middleware(['auth', 'role:admin']);
-    //}
-
     public function index()
     {
-        $tickets = Ticket::latest()->paginate(10);
+        // Ganti ->get() menjadi ->paginate(10)
+        $tickets = Ticket::with('user')->latest()->paginate(10);
+        
         return view('admin.tickets.index', compact('tickets'));
     }
 
     public function show(Ticket $ticket)
     {
-        $teknisiUsernames = \App\Models\USERLOG_ROLES::where('USERLOG_ROLES', 'LIKE', 'teknisi%')->pluck('USERLOGNM'); 
-        $teknisiList = \App\Models\USERLOG_ID::whereIn('USERLOGNM', $teknisiUsernames)->get();
+        // Sesuaikan dengan foto Navicat: Tabel USERLOG_ROLES, Kolom USERLOG_ROLES
+        $teknisiList = DB::table('USERLOG_ROLES')
+            ->where('USERLOG_ROLES', 'LIKE', 'teknisi%')
+            ->orderBy('USERLOGNM', 'asc')
+            ->get();
 
         return view('admin.tickets.show', compact('ticket', 'teknisiList'));
     }
 
     public function assign(Request $request, Ticket $ticket)
     {
-        // 1. Validasi sederhana saja karena yang dikirim adalah string nama teknisi
         $request->validate([
-            'teknisi_id' => 'required|string', 
+            'teknisi' => 'required|string',
         ]);
 
-        // 2. Langsung simpan nilai 'teknisi_id' (yang isinya "teknisi 2") ke kolom 'teknisi'
-        $ticket->teknisi = $request->teknisi_id; 
-        
-        // 3. Simpan ke database
-        if ($ticket->save()) {
-            return redirect()
-                ->route('admin.tickets.show', $ticket->id)
-                ->with('success', 'Teknisi ' . $request->teknisi_id . ' berhasil ditugaskan.');
-        }
+        // Cari ID di tabel USERLOG_ROLES (kolom id huruf kecil sesuai Navicat)
+        $teknisiData = DB::table('USERLOG_ROLES')
+            ->where('USERLOGNM', $request->teknisi)
+            ->first();
 
-        return redirect()->back()->with('error', 'Gagal menyimpan data.');
+        $ticket->update([
+            'teknisi'    => $request->teknisi,
+            'teknisi_id' => $teknisiData->id ?? null, 
+            'status'     => 'On Progress',
+        ]);
+
+        return redirect()->back()->with('success', 'Teknisi berhasil ditugaskan.');
     }
 
+    // Update Status & Prioritas (Fungsi Status)
     public function status(Request $request, Ticket $ticket)
     {
         $request->validate([
-            'status' => 'required|string|max:50',
-            'prioritas' => 'nullable|string|max:50',
+            'status'    => 'required|in:Open,On Progress,Done,Cancel',
+            'prioritas' => 'nullable|in:Low,Medium,High,Urgent',
         ]);
 
-        $ticket->status = $request->status;
-        $ticket->prioritas = $request->prioritas;
-        $ticket->save();
+        $ticket->update([
+            'status'    => $request->status,
+            'prioritas' => $request->prioritas,
+        ]);
 
-        return redirect()
-            ->route('admin.tickets.show', $ticket->id)
-            ->with('success', 'Status/Prioritas berhasil diupdate.');
+        return redirect()->back()->with('success', 'Status & Prioritas tiket berhasil diperbarui.');
     }
 }

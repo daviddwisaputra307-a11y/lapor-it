@@ -4,28 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
 
 class Ticket extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
+    protected $guarded = []; // Sudah benar, mengizinkan semua kolom diisi
 
     protected $table = 'tickets';
 
-    /*protected $fillable = [
-        'nomor_tiket',
-        'user_id',
-        'judul',
-        'deskripsi',
-        'lokasi',
-        'prioritas',
-        'teknisi',
-        'status',
-    ];*/
-
-    // auto generate nomor tiket
+    // Auto generate nomor tiket IT-YYYYMMDD-0001
     protected static function booted()
     {
         static::creating(function ($ticket) {
@@ -35,14 +23,16 @@ class Ticket extends Model
         });
     }
 
-    // relasi
+    // Relasi ke User (Pelapor)
     public function user()
     {
-        return $this->belongsTo(User::class);
+        // Sesuaikan jika foreign key di tabel tickets adalah 'user_id'
+        return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function category()
+    // Relasi ke Teknisi (Optional jika ingin pakai relasi)
+    public function teknisiUser()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(USERLOG_ID::class, 'teknisi_id', 'ID');
     }
 }
