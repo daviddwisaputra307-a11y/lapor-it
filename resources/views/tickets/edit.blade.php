@@ -20,16 +20,16 @@
           @endforeach
         </select>
 
-        <div class="mt-6 flex justify-end gap-3">
-          <a href="{{ route('tickets.index') }}"
-             class="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50">
-            Batal
-          </a>
-          <button type="submit"
-                  class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">
-            Simpan
-          </button>
-        </div>
+          <div class="flex justify-end space-x-3">
+              {{-- UBAH BAGIAN INI: Ganti tickets.index menjadi dashboard --}}
+              <a href="{{ route('dashboard') }}" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">
+                  Batal
+              </a>
+              
+              <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                  Simpan
+              </button>
+          </div>
       </form>
     </div>
   </div>

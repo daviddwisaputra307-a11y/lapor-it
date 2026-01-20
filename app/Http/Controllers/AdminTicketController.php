@@ -20,24 +20,30 @@ class AdminTicketController extends Controller
 
     public function show(Ticket $ticket)
     {
-        // daftar teknisi sementara (nanti bisa ambil dari tabel teknisi)
-        $teknisiList = ['Rizky', 'Agus', 'Budi', 'Dina', 'Teknisi A'];
+        $teknisiUsernames = \App\Models\USERLOG_ROLES::where('USERLOG_ROLES', 'LIKE', 'teknisi%')->pluck('USERLOGNM'); 
+        $teknisiList = \App\Models\USERLOG_ID::whereIn('USERLOGNM', $teknisiUsernames)->get();
 
         return view('admin.tickets.show', compact('ticket', 'teknisiList'));
     }
 
     public function assign(Request $request, Ticket $ticket)
     {
+        // 1. Validasi sederhana saja karena yang dikirim adalah string nama teknisi
         $request->validate([
-            'teknisi' => 'nullable|string|max:100',
+            'teknisi_id' => 'required|string', 
         ]);
 
-        $ticket->teknisi = $request->teknisi; // kolom teknisi (string)
-        $ticket->save();
+        // 2. Langsung simpan nilai 'teknisi_id' (yang isinya "teknisi 2") ke kolom 'teknisi'
+        $ticket->teknisi = $request->teknisi_id; 
+        
+        // 3. Simpan ke database
+        if ($ticket->save()) {
+            return redirect()
+                ->route('admin.tickets.show', $ticket->id)
+                ->with('success', 'Teknisi ' . $request->teknisi_id . ' berhasil ditugaskan.');
+        }
 
-        return redirect()
-            ->route('admin.tickets.show', $ticket->id)
-            ->with('success', 'Teknisi berhasil disimpan.');
+        return redirect()->back()->with('error', 'Gagal menyimpan data.');
     }
 
     public function status(Request $request, Ticket $ticket)

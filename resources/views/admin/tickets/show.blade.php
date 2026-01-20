@@ -71,6 +71,16 @@
     </div>
   @endif
 
+  @if ($errors->any())
+      <div style="background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:10px; border-radius:12px; margin-bottom:12px;">
+          <ul>
+              @foreach ($errors->all() as $error)
+                  <li>{{ $error }}</li>
+              @endforeach
+          </ul>
+      </div>
+  @endif
+
   {{-- Badges --}}
   <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
     <span class="chip chip-blue">No: {{ $ticket->nomor_tiket ?? '-' }}</span>
@@ -108,13 +118,13 @@
           @csrf
 
           <label>Pilih teknisi</label>
-          <select name="teknisi" required>
-            <option value="">-- pilih --</option>
-            @foreach(($teknisiList ?? []) as $t)
-              <option value="{{ $t }}" {{ ($ticket->teknisi === $t) ? 'selected' : '' }}>
-                {{ $t }}
-              </option>
-            @endforeach
+          <select name="teknisi_id" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm">
+              <option value="">-- Pilih Teknisi --</option>
+              @foreach($teknisiList as $t)
+                  <option value="{{ $t->USERLOGNM }}" {{ $ticket->teknisi == $t->USERLOGNM ? 'selected' : '' }}>
+                      {{ $t->USERLOGNM }}
+                  </option>
+              @endforeach
           </select>
 
           <div style="height:12px;"></div>
