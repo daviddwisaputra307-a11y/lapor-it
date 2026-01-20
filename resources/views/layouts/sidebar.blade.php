@@ -1,4 +1,5 @@
-<aside class="w-64 bg-slate-900 text-slate-100 flex flex-col">
+
+    <aside class="w-64 bg-slate-900 text-slate-100 flex flex-col min-h-screen">
 
     {{-- HEADER --}}
     <div class="px-6 py-5 border-b border-slate-700">
@@ -62,10 +63,12 @@
     </nav>
 
     {{-- LOGOUT --}}
-    <div class="p-3 border-t border-slate-700">
-        <form method="POST" action="{{ route('logout') }}">
+    <div class="p-4 border-t">
+        <form method="POST" 
+        action="{{ route('logout') }}">
             @csrf
-            <button class="w-full px-3 py-2 rounded bg-red-600 hover:bg-red-700 text-white">
+            <button type="submit"
+            class="w-full px-4 py-2 rounded bg-red-600 text-white font-semibold">
                 Logout
             </button>
         </form>

@@ -25,7 +25,7 @@
 
             <!-- Primary Button -->
             <a href="{{ route('categories.create') }}"
-                class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-xl border border-green-600 text-green-700 bg-white hover:bg-green-600 hover:text-white transition">
+                class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-xl border border-blue-600 text-blue-700 bg-white hover:bg-blue-600 hover:text-white transition">
                 + Tambah Kategori
             </a>
         </div>
