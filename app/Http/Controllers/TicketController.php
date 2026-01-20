@@ -31,6 +31,11 @@ class TicketController extends Controller
         return view('tickets.index', compact('tickets'));
     }
 
+    public function show(Ticket $ticket)
+    {
+        return view('tickets.show', compact('ticket'));
+    }
+
     public function create()
     {
         $bagians = DB::table('dbo.BAGIAN')
@@ -146,4 +151,53 @@ class TicketController extends Controller
 
         return view('dashboard', compact('tickets'));
     }
+
+    /**
+ * Menampilkan halaman edit status untuk User atau Teknisi.
+ */
+    public function editStatus(Ticket $ticket)
+    {
+        $user = auth()->user();
+        $uslognm = $user->USLOGNM ?? null;
+
+        // Mengambil data user berdasarkan USERLOGNM dari tabel USERLOG_ROLES
+        // Sesuai dengan struktur Navicat yang Anda miliki sebelumnya
+        $userData = \Illuminate\Support\Facades\DB::table('USERLOG_ROLES')
+            ->where('USERLOGNM', $uslognm)
+            ->first();
+        
+        $userId = $userData?->id; // Gunakan 'id' huruf kecil sesuai foto Navicat
+
+        // Cek apakah dia pemilik tiket atau teknisi yang ditugaskan
+        $isOwner = ($ticket->user_id == $userId);
+        $isTeknisi = (trim($ticket->teknisi) == trim($uslognm) || $ticket->teknisi_id == $userId);
+
+        if (!$isOwner && !$isTeknisi) {
+            abort(403, 'Anda tidak memiliki akses untuk mengubah status tiket ini.');
+        }
+
+        return view('tickets.edit', compact('ticket'));
+    }
+
+    /**
+     * Menyimpan perubahan status tiket.
+     */
+    public function updateStatus(Request $request, Ticket $ticket)
+    {
+        $request->validate([
+            'status' => 'required|string|in:Open,On Progress,Done,Cancel',
+        ]);
+
+        $ticket->update([
+            'status' => $request->status,
+        ]);
+
+        // Jika user adalah teknisi, arahkan kembali ke dashboard teknisi
+        if (str_contains(strtolower(auth()->user()->role), 'teknisi')) {
+            return redirect()->route('dashboard.teknisi')->with('success', 'Status tiket berhasil diperbarui.');
+        }
+
+        return redirect()->route('tickets.index')->with('success', 'Status tiket berhasil diperbarui.');
+    }
+
 }
