@@ -53,8 +53,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/tickets', [AdminTicketController::class, 'index'])
         ->name('admin.tickets.index');
 
-    Route::get('/admin/tickets/{ticket}', [AdminTicketController::class, 'show'])
-        ->name('admin.tickets.show');
+    Route::get('/admin/tickets/{ticket}', [AdminTicketController::class, 'edit'])
+        ->name('admin.tickets.edit');
 
     // Sesuai dengan form di show.blade.php
     Route::post('/admin/tickets/{ticket}/assign', [AdminTicketController::class, 'assign'])

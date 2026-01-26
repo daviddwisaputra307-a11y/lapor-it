@@ -12,11 +12,11 @@ class AdminTicketController extends Controller
     {
         // Ganti ->get() menjadi ->paginate(10)
         $tickets = Ticket::with('user')->latest()->paginate(10);
-        
+
         return view('admin.tickets.index', compact('tickets'));
     }
 
-    public function show(Ticket $ticket)
+    public function edit(Ticket $ticket)
     {
         // Sesuaikan dengan foto Navicat: Tabel USERLOG_ROLES, Kolom USERLOG_ROLES
         $teknisiList = DB::table('USERLOG_ROLES')
@@ -24,7 +24,7 @@ class AdminTicketController extends Controller
             ->orderBy('USERLOGNM', 'asc')
             ->get();
 
-        return view('admin.tickets.show', compact('ticket', 'teknisiList'));
+        return view('admin.tickets.edit', compact('ticket', 'teknisiList'));
     }
 
     public function assign(Request $request, Ticket $ticket)
@@ -40,7 +40,7 @@ class AdminTicketController extends Controller
 
         $ticket->update([
             'teknisi'    => $request->teknisi,
-            'teknisi_id' => $teknisiData->id ?? null, 
+            'teknisi_id' => $teknisiData->id ?? null,
             'status'     => 'On Progress',
         ]);
 
