@@ -35,4 +35,12 @@ class Ticket extends Model
     {
         return $this->belongsTo(USERLOG_ID::class, 'teknisi_id', 'ID');
     }
+
+    // Accessor untuk mendapatkan URL gambar
+    public function getGambarUrlAttribute()
+    {
+        return $this->path_gambar
+            ? asset('storage/' . $this->path_gambar)
+            : null;
+    }
 }

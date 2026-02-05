@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ticket;
-use App\Models\USERLOG_ID; // Pastikan model ini ada
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use App\Models\USERLOG_ID; // Pastikan model ini ada
 
 class TicketController extends Controller
 {
@@ -48,27 +48,96 @@ class TicketController extends Controller
 
     public function store(Request $request)
     {
+        // Debug: cek semua input
+        \Log::info('Form submit', [
+            'inputs' => $request->except(['_token', 'gambar']),
+            'has_gambar' => $request->has('gambar'),
+            'gambar_filled' => $request->filled('gambar'),
+        ]);
+
+        if ($request->filled('gambar')) {
+            \Log::info('Gambar info', [
+                'length' => strlen($request->gambar),
+            ]);
+        }
+
         $validated = $request->validate([
             'judul' => ['required', 'string', 'max:255'],
             'deskripsi' => ['required', 'string'],
             'lokasi' => ['required', 'string'],
+            'gambar' => ['nullable', 'string'], // Base64 image
         ]);
 
         $uslognm = Auth::user()->USLOGNM ?? null;
         $user = USERLOG_ID::where('USERLOGNM', $uslognm)->first();
 
-        Ticket::create([
-            'user_id'   => $user->ID ?? null,
-            'judul'     => $validated['judul'],
-            'deskripsi' => $validated['deskripsi'],
-            'lokasi'    => $validated['lokasi'],
-            'prioritas' => 'Low',
-            'status'    => 'Open',
+        // Handle image upload
+        $pathGambar = null;
+        if ($request->filled('gambar')) {
+            try {
+                $pathGambar = $this->saveBase64Image($request->gambar, $user->ID ?? random_int(1, 99));
+                \Log::info('Gambar berhasil disimpan', [
+                    'path' => $pathGambar
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Gagal menyimpan gambar', [
+                    'message' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            }
+        } else {
+            \Log::warning('Tidak ada gambar yang diupload');
+        }
+
+        $ticket = Ticket::create([
+            'user_id'     => $user->ID ?? null,
+            'judul'       => $validated['judul'],
+            'deskripsi'   => $validated['deskripsi'],
+            'lokasi'      => $validated['lokasi'],
+            'path_gambar' => $pathGambar,
+            'prioritas'   => 'Low',
+            'status'      => 'Open',
+        ]);
+
+        \Log::info('Ticket created', [
+            'ticket_id' => $ticket->id,
+            'path_gambar' => $ticket->path_gambar,
         ]);
 
         return redirect()->route('tickets.index')->with('success', 'Laporan berhasil dikirim');
     }
 
+    /**
+     * Save base64 image to storage
+     */
+    private function saveBase64Image($base64String, $userId)
+    {
+        // Pastikan folder ada
+        if (!file_exists(storage_path('app/public/tickets'))) {
+            mkdir(storage_path('app/public/tickets'), 0755, true);
+        }
+
+        // Remove data:image/png;base64, atau data:image/jpeg;base64, prefix
+        if (strpos($base64String, 'data:image') === 0) {
+            $base64String = preg_replace('/^data:image\/\w+;base64,/', '', $base64String);
+        }
+
+        $imageData = base64_decode($base64String);
+
+        if ($imageData === false) {
+            throw new \Exception('Failed to decode base64 image');
+        }
+
+        // Generate unique filename
+        $filename = 'ticket_' . date('Ymd_His') . '_' . $userId . '.png';
+        $path = 'tickets/' . $filename;
+        $fullPath = storage_path('app/public/' . $path);
+
+        // Save file
+        file_put_contents($fullPath, $imageData);
+
+        return $path;
+    }
 
     // --- KHUSUS ADMIN (Untuk show.blade.php yang Anda kirim) ---
     public function adminShow(Ticket $ticket)
