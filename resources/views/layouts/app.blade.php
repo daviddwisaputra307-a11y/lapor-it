@@ -9,6 +9,7 @@
     <title>{{ config('app.name', 'LaporIT') }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
 </head>
 
 <body class="bg-gray-100 text-gray-800">

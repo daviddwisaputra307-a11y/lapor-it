@@ -3,135 +3,457 @@
 @section('title', 'Buat Laporan IT - Lapor IT')
 
 @section('content')
-<div class="max-w-4xl mx-auto space-y-6">
+    <div class="max-w-4xl mx-auto space-y-6">
 
-    {{-- Header --}}
-    <div class="bg-gradient-to-r from-blue-500 to-cyan-400 rounded-2xl p-6 shadow-lg text-white">
-        <div class="flex items-center gap-3">
-            <div>
-                <h1 class="text-2xl font-bold">Buat Laporan IT</h1>
-                <p class="text-blue-50">Lapor IT - Laporkan Problem IT di Rumah Sakit</p>
-            </div>
-        </div>
-    </div>
-
-    {{-- Alert success --}}
-    @if (session('success'))
-        <div class="rounded-xl border-2 border-green-300 bg-green-50 px-4 py-3 text-green-800 flex items-center gap-2 shadow-sm">
-            <div><strong>Berhasil!</strong> {{ session('success') }}</div>
-        </div>
-    @endif
-
-    {{-- Error summary --}}
-    @if ($errors->any())
-        <div class="rounded-xl border-2 border-red-300 bg-red-50 px-4 py-3 text-red-800 flex items-center gap-2 shadow-sm">
-            <div><strong>Gagal:</strong> cek input kamu ya.</div>
-        </div>
-    @endif
-
-    <div class="bg-white rounded-2xl shadow-lg border border-blue-100 p-6">
-        <form method="POST" action="{{ route('tickets.store') }}" class="space-y-5">
-            @csrf
-
-            {{-- Judul --}}
-            <div>
-                <label for="judul" class="flex items-center gap-1 text-sm font-bold text-blue-900 mb-2">
-                    Judul <span class="text-red-600">*</span>
-                </label>
-                <input
-                    id="judul"
-                    type="text"
-                    name="judul"
-                    value="{{ old('judul') }}"
-                    placeholder="Contoh: Printer error / WiFi lemot / PC bluescreen"
-                    class="w-full px-4 py-2.5 rounded-xl border-2 border-blue-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none"
-                    required
-                >
-                @error('judul')
-                    <div class="mt-2 flex items-center gap-1 text-xs text-red-600">
-                        {{ $message }}
-                    </div>
-                @enderror
-            </div>
-
-            {{-- Deskripsi --}}
-            <div>
-                <label for="deskripsi" class="flex items-center gap-1 text-sm font-bold text-blue-900 mb-2">
-                    Deskripsi <span class="text-red-600">*</span>
-                </label>
-                <textarea
-                    id="deskripsi"
-                    name="deskripsi"
-                    rows="5"
-                    placeholder="Jelasin singkat: masalahnya apa, kapan kejadian, ada pesan error apa..."
-                    class="w-full px-4 py-2.5 rounded-xl border-2 border-blue-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none resize-y"
-                    required
-                >{{ old('deskripsi') }}</textarea>
-                @error('deskripsi')
-                    <div class="mt-2 flex items-center gap-1 text-xs text-red-600">
-                        {{ $message }}
-                    </div>
-                @enderror
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {{-- Lokasi --}}
+        {{-- Header --}}
+        <div class="bg-gradient-to-r from-blue-500 to-cyan-400 rounded-2xl p-6 shadow-lg text-white">
+            <div class="flex items-center gap-3">
                 <div>
-                    <label for="lokasi" class="flex items-center gap-1 text-sm font-bold text-blue-900 mb-2">
-                        Lokasi / Unit Kerja <span class="text-red-600">*</span>
-                    </label>
-                    <select id="lokasi" name="lokasi"
-                        class="w-full px-4 py-2.5 rounded-xl border-2 border-blue-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none" required>
-                        <option value="" disabled {{ old('lokasi') ? '' : 'selected' }}>
-                            -- pilih lokasi --
-                        </option>
-                        @foreach ($bagians as $b)
-                            <option value="{{ $b->KODEBAGIAN }}"
-                                {{ old('lokasi') == $b->KODEBAGIAN ? 'selected' : '' }}>
-                                {{ $b->NAMABAGIAN }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('lokasi')
-                        <div class="mt-2 flex items-center gap-1 text-xs text-red-600">
-                            {{ $message }}
-                        </div>
-                    @enderror
+                    <h1 class="text-2xl font-bold">Buat Laporan IT</h1>
+                    <p class="text-blue-50">Lapor IT - Laporkan Problem IT di Rumah Sakit</p>
                 </div>
+            </div>
+        </div>
 
-                {{-- Prioritas --}}
+        {{-- Alert success --}}
+        @if (session('success'))
+            <div
+                class="rounded-xl border-2 border-green-300 bg-green-50 px-4 py-3 text-green-800 flex items-center gap-2 shadow-sm">
+                <div><strong>Berhasil!</strong> {{ session('success') }}</div>
+            </div>
+        @endif
+
+        {{-- Error summary --}}
+        @if ($errors->any())
+            <div
+                class="rounded-xl border-2 border-red-300 bg-red-50 px-4 py-3 text-red-800 flex items-center gap-2 shadow-sm">
+                <div><strong>Gagal:</strong> cek input kamu ya.</div>
+            </div>
+        @endif
+
+        <div class="bg-white rounded-2xl shadow-lg border border-blue-100 p-6">
+            <form method="POST" action="{{ route('tickets.store') }}" class="space-y-5">
+                @csrf
+
+                {{-- Judul --}}
                 <div>
-                    <label for="prioritas" class="flex items-center gap-1 text-sm font-bold text-blue-900 mb-2">
-                        Prioritas <span class="text-red-600">*</span>
+                    <label for="judul" class="flex items-center gap-1 text-sm font-bold text-blue-900 mb-2">
+                        Judul <span class="text-red-600">*</span>
                     </label>
-                    <select
-                        id="prioritas"
-                        name="prioritas"
+                    <input id="judul" type="text" name="judul" value="{{ old('judul') }}"
+                        placeholder="Contoh: Printer error / WiFi lemot / PC bluescreen"
                         class="w-full px-4 py-2.5 rounded-xl border-2 border-blue-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none"
-                        required
-                    >
-                        <option value="Low" {{ old('prioritas', 'Low') == 'Low' ? 'selected' : '' }}>Low</option>
-                        <option value="Medium" {{ old('prioritas') == 'Medium' ? 'selected' : '' }}>Medium</option>
-                        <option value="High" {{ old('prioritas') == 'High' ? 'selected' : '' }}>High</option>
-                    </select>
-                    @error('prioritas')
+                        required>
+                    @error('judul')
                         <div class="mt-2 flex items-center gap-1 text-xs text-red-600">
                             {{ $message }}
                         </div>
                     @enderror
                 </div>
-            </div>
 
-            <div class="flex items-center justify-end gap-3 pt-4">
-                <a href="{{ url()->previous() }}"
-                   class="inline-flex items-center gap-1 px-6 py-2.5 rounded-xl border-2 border-gray-300 text-gray-700 bg-white hover:bg-gray-100 font-semibold transition">
-                    Batal
-                </a>
-                <button type="submit" class="inline-flex items-center gap-1 px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-bold hover:scale-105 transition-transform shadow-md">
+                {{-- Deskripsi --}}
+                <div>
+                    <label for="deskripsi" class="flex items-center gap-1 text-sm font-bold text-blue-900 mb-2">
+                        Deskripsi <span class="text-red-600">*</span>
+                    </label>
+                    <textarea id="deskripsi" name="deskripsi" rows="5"
+                        placeholder="Jelasin singkat: masalahnya apa, kapan kejadian, ada pesan error apa..."
+                        class="w-full px-4 py-2.5 rounded-xl border-2 border-blue-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none resize-y"
+                        required>{{ old('deskripsi') }}</textarea>
+                    @error('deskripsi')
+                        <div class="mt-2 flex items-center gap-1 text-xs text-red-600">
+                            {{ $message }}
+                        </div>
+                    @enderror
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {{-- Lokasi --}}
+                    <div>
+                        <label for="lokasi" class="flex items-center gap-1 text-sm font-bold text-blue-900 mb-2">
+                            Lokasi / Unit Kerja <span class="text-red-600">*</span>
+                        </label>
+                        <select id="lokasi" name="lokasi"
+                            class="w-full px-4 py-2.5 rounded-xl border-2 border-blue-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none"
+                            required>
+                            <option value="" disabled {{ old('lokasi') ? '' : 'selected' }}>
+                                -- pilih lokasi --
+                            </option>
+                            @foreach ($bagians as $b)
+                                <option value="{{ $b->KODEBAGIAN }}"
+                                    {{ old('lokasi') == $b->KODEBAGIAN ? 'selected' : '' }}>
+                                    {{ $b->NAMABAGIAN }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('lokasi')
+                            <div class="mt-2 flex items-center gap-1 text-xs text-red-600">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+
+                    {{-- Prioritas --}}
+                    <div>
+                        <label for="prioritas" class="flex items-center gap-1 text-sm font-bold text-blue-900 mb-2">
+                            Prioritas <span class="text-red-600">*</span>
+                        </label>
+                        <select id="prioritas" name="prioritas"
+                            class="w-full px-4 py-2.5 rounded-xl border-2 border-blue-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none"
+                            required>
+                            <option value="Low" {{ old('prioritas', 'Low') == 'Low' ? 'selected' : '' }}>Low</option>
+                            <option value="Medium" {{ old('prioritas') == 'Medium' ? 'selected' : '' }}>Medium</option>
+                            <option value="High" {{ old('prioritas') == 'High' ? 'selected' : '' }}>High</option>
+                        </select>
+                        @error('prioritas')
+                            <div class="mt-2 flex items-center gap-1 text-xs text-red-600">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+                </div>
+
+                {{-- GAMBAR UPLOAD & EDIT --}}
+                <div>
+                    <label class="flex items-center gap-1 text-sm font-bold text-blue-900 mb-2">
+                        📷 Lampiran Gambar <span class="text-xs text-gray-500 font-normal">(opsional)</span>
+                    </label>
+
+                    {{-- Upload Area --}}
+                    <div id="uploadArea"
+                        class="border-2 border-dashed border-blue-300 rounded-xl p-6 text-center bg-blue-50 hover:bg-blue-100 transition cursor-pointer">
+                        <input type="file" id="fileInput" accept="image/png,image/jpeg,image/jpg" class="hidden">
+                        <div class="space-y-2">
+                            <div class="text-4xl">📸</div>
+                            <div class="text-sm text-gray-600">
+                                <span class="font-semibold text-blue-600">Klik untuk upload</span> atau
+                                <span class="font-semibold text-blue-600">Paste (Ctrl+V)</span> screenshot
+                            </div>
+                            <div class="text-xs text-gray-500">PNG, JPG, JPEG • Max 2MB</div>
+                        </div>
+                    </div>
+
+                    {{-- Canvas Editor (Hidden by default) --}}
+                    <div id="editorContainer" class="hidden mt-4">
+                        <div class="bg-white border-2 border-blue-200 rounded-xl p-4 space-y-3">
+                            {{-- Toolbar --}}
+                            <div class="flex flex-wrap items-center gap-2 pb-3 border-b border-blue-100">
+                                <button type="button" id="btnDraw"
+                                    class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition-all shadow-sm">
+                                    ✏️ Draw
+                                </button>
+
+                                <button type="button" id="btnRedo" onclick="redoCanvas()"
+                                    class="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-bold hover:bg-gray-700 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                                    ↪️ Redo
+                                </button>
+
+                                <button type="button" id="btnUndo" onclick="undoCanvas()"
+                                    class="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-bold hover:bg-orange-700 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                                    ↩️ Undo
+                                </button>
+
+                                <div class="h-8 w-px bg-gray-300 mx-1"></div>
+
+                                <div class="flex items-center gap-2">
+                                    <label class="text-xs font-bold text-gray-700">Warna:</label>
+                                    <input type="color" id="colorPicker" value="#ff0000"
+                                        class="w-10 h-10 rounded cursor-pointer border-2 border-gray-300 hover:border-blue-400 transition">
+                                </div>
+
+                                <div class="flex items-center gap-2">
+                                    <label class="text-xs font-bold text-gray-700">Ukuran:</label>
+                                    <input type="range" id="brushSize" min="1" max="20" value="3"
+                                        class="w-24 accent-blue-600">
+                                    <span id="brushSizeValue"
+                                        class="text-sm font-bold text-gray-700 w-6 text-center bg-gray-100 px-2 py-1 rounded">3</span>
+                                </div>
+
+                                <button type="button" id="btnClear"
+                                    class="ml-auto px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700 transition-all shadow-sm">
+                                    🗑️ Hapus Gambar
+                                </button>
+                            </div>
+
+                            {{-- Canvas --}}
+                            <div class="flex justify-center bg-gray-100 rounded-lg p-4">
+                                <canvas id="canvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Hidden input untuk base64 --}}
+                    <input type="hidden" id="gambarBase64" name="gambar">
+
+                    @error('gambar')
+                        <div class="mt-2 flex items-center gap-1 text-xs text-red-600">
+                            ⚠️ {{ $message }}
+                        </div>
+                    @enderror
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-4">
+                    <a href="{{ url()->previous() }}"
+                        class="inline-flex items-center gap-1 px-6 py-2.5 rounded-xl border-2 border-gray-300 text-gray-700 bg-white hover:bg-gray-100 font-semibold transition">
+                        Batal
+                    </a>
+                    <button type="submit"
+                        class="inline-flex items-center gap-1 px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-bold hover:scale-105 transition-transform shadow-md">
                         Kirim Laporan
-                </button>
-            </div>
-        </form>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
+
+    <script>
+        let canvas;
+        let canvasHistory = [];
+        let historyStep = -1;
+        let saveTimeout = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const editorContainer = document.getElementById('editorContainer');
+            const gambarBase64Input = document.getElementById('gambarBase64');
+            const formElement = document.querySelector('form');
+
+            /* =========================
+                PASTE IMAGE (Ctrl + V)
+            ========================= */
+            document.addEventListener('paste', function(e) {
+                const items = e.clipboardData?.items;
+                if (!items) return;
+
+                for (let item of items) {
+                    if (item.type.indexOf('image') !== -1) {
+                        e.preventDefault();
+
+                        const file = item.getAsFile();
+                        if (file) handleImageFile(file);
+
+                        break;
+                    }
+                }
+            });
+
+            /* =========================
+               IMAGE LOAD
+            ========================== */
+
+            uploadArea.addEventListener('click', () => fileInput.click());
+
+            fileInput.addEventListener('change', e => {
+                if (e.target.files[0]) handleImageFile(e.target.files[0]);
+            });
+
+            function handleImageFile(file) {
+                const reader = new FileReader();
+                reader.onload = e => initCanvas(e.target.result);
+                reader.readAsDataURL(file);
+            }
+
+            /* =========================
+               CANVAS INIT
+            ========================== */
+
+            function initCanvas(imageDataUrl) {
+
+                uploadArea.classList.add('hidden');
+                editorContainer.classList.remove('hidden');
+
+                if (canvas) {
+                    canvas.dispose();
+                    canvasHistory = [];
+                    historyStep = -1;
+                }
+
+                canvas = new fabric.Canvas('canvas', {
+                    isDrawingMode: true,
+                    renderOnAddRemove: false
+                });
+
+                fabric.Image.fromURL(imageDataUrl, function(img) {
+
+                    const maxW = 800;
+                    const maxH = 600;
+
+                    const scale = Math.min(
+                        maxW / img.width,
+                        maxH / img.height,
+                        1
+                    );
+
+                    img.scale(scale);
+
+                    canvas.setWidth(img.width * scale);
+                    canvas.setHeight(img.height * scale);
+
+                    canvas.backgroundColor = "#ffffff";
+
+                    canvas.setBackgroundImage(
+                        img,
+                        canvas.renderAll.bind(canvas)
+                    );
+
+                    /* Smooth brush */
+                    const brush = new fabric.PencilBrush(canvas);
+                    brush.width = 3;
+                    brush.color = "#ff0000";
+                    brush.decimate = 2; // smoothing
+
+                    canvas.freeDrawingBrush = brush;
+
+                    saveSnapshot();
+                    updateBase64();
+                });
+
+                /* Drawing finished */
+                canvas.on('path:created', function() {
+
+                    mergeDrawing();
+
+                    clearTimeout(saveTimeout);
+                    saveTimeout = setTimeout(() => {
+                        saveSnapshot();
+                        updateBase64();
+                    }, 100);
+                });
+            }
+
+            /* =========================
+               MERGE DRAWINGS
+               keeps canvas light
+            ========================== */
+
+            function mergeDrawing() {
+                if (!canvas) return;
+
+                const dataURL = canvas.toDataURL();
+
+                fabric.Image.fromURL(dataURL, function(img) {
+
+                    canvas.clear();
+
+                    canvas.setBackgroundImage(
+                        img,
+                        canvas.renderAll.bind(canvas)
+                    );
+
+                    canvas.isDrawingMode = true;
+                });
+            }
+
+            /* =========================
+               HISTORY SNAPSHOT
+            ========================== */
+
+            function saveSnapshot() {
+                canvasHistory = canvasHistory.slice(0, historyStep + 1);
+
+                canvasHistory.push(canvas.toDataURL());
+                historyStep = canvasHistory.length - 1;
+
+                if (canvasHistory.length > 20) {
+                    canvasHistory.shift();
+                    historyStep--;
+                }
+
+                updateUndoRedoButtons();
+            }
+
+            /* =========================
+               UNDO / REDO FAST
+            ========================== */
+
+            window.undoCanvas = function() {
+                if (historyStep <= 0) return;
+
+                historyStep--;
+                restoreSnapshot();
+            };
+
+            window.redoCanvas = function() {
+                if (historyStep >= canvasHistory.length - 1) return;
+
+                historyStep++;
+                restoreSnapshot();
+            };
+
+            function restoreSnapshot() {
+                fabric.Image.fromURL(canvasHistory[historyStep], function(img) {
+
+                    canvas.clear();
+
+                    canvas.setBackgroundImage(
+                        img,
+                        canvas.renderAll.bind(canvas)
+                    );
+
+                    canvas.isDrawingMode = true;
+
+                    updateUndoRedoButtons();
+                    updateBase64();
+                });
+            }
+
+            function updateUndoRedoButtons() {
+                const u = document.getElementById('btnUndo');
+                const r = document.getElementById('btnRedo');
+
+                if (u) u.disabled = historyStep <= 0;
+                if (r) r.disabled = historyStep >= canvasHistory.length - 1;
+            }
+
+            /* =========================
+               TOOLBAR
+            ========================== */
+
+            document.getElementById('colorPicker').onchange = e => {
+                if (!canvas) return;
+                canvas.freeDrawingBrush.color = e.target.value;
+            };
+
+            document.getElementById('brushSize').oninput = e => {
+                if (!canvas) return;
+
+                const size = parseInt(e.target.value);
+                canvas.freeDrawingBrush.width = size;
+                document.getElementById('brushSizeValue').textContent = size;
+            };
+
+            document.getElementById('btnClear').onclick = () => {
+                if (!confirm('Hapus gambar?')) return;
+
+                canvas.dispose();
+                canvas = null;
+                canvasHistory = [];
+                historyStep = -1;
+
+                editorContainer.classList.add('hidden');
+                uploadArea.classList.remove('hidden');
+                fileInput.value = '';
+                gambarBase64Input.value = '';
+            };
+
+            /* =========================
+               SUBMIT
+            ========================== */
+
+            function updateBase64() {
+                if (!canvas) return;
+                gambarBase64Input.value = canvas.toDataURL({
+                    quality: 0.8
+                });
+            }
+
+            formElement.addEventListener('submit', function() {
+                if (canvas) updateBase64();
+            });
+
+        });
+    </script>
+
 @endsection

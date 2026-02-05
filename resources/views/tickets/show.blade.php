@@ -65,7 +65,8 @@
                         @php
                             $status = strtolower($ticket->status ?? 'open');
                         @endphp
-                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border-2
+                        <span
+                            class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border-2
                             {{ $status === 'done' ? 'bg-green-100 text-green-700 border-green-300' : '' }}
                             {{ $status === 'on progress' || $status === 'in_progress' ? 'bg-yellow-100 text-yellow-700 border-yellow-300' : '' }}
                             {{ $status === 'open' ? 'bg-blue-100 text-blue-700 border-blue-300' : '' }}
@@ -85,6 +86,21 @@
                     </div>
                 </div>
 
+                {{-- LAMPIRAN GAMBAR --}}
+                @if ($ticket->path_gambar)
+                    <div class="pt-4 border-t border-blue-100">
+                        <div class="flex items-center gap-1 text-xs font-bold text-blue-900 mb-3">
+                            📷 Lampiran Gambar
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-4 border border-blue-100">
+                            <img src="{{ $ticket->gambar_url }}" alt="Lampiran {{ $ticket->nomor_tiket }}"
+                                class="max-w-md mx-auto h-auto rounded-lg border-2 border-blue-200 shadow cursor-pointer hover:shadow-xl hover:scale-105 transition"
+                                style="max-height: 100px; object-fit: contain;" onclick="showImageModal(this.src)">
+                            <p class="text-xs text-gray-500 mt-2 text-center">Klik gambar untuk melihat ukuran penuh</p>
+                        </div>
+                    </div>
+                @endif
+
             </div>
         </div>
 
@@ -97,4 +113,34 @@
         </div>
 
     </div>
+
+    {{-- Modal Preview Gambar --}}
+    <div id="imageModal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4"
+        onclick="closeImageModal()">
+        <div class="relative max-w-6xl max-h-full" onclick="event.stopPropagation()">
+            <button onclick="closeImageModal()"
+                class="absolute -top-10 right-0 text-white text-2xl font-bold hover:text-gray-300 transition">
+                ✕ Tutup
+            </button>
+            <img id="modalImage" src="" alt="Preview" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl">
+        </div>
+    </div>
+
+    <script>
+        function showImageModal(imageSrc) {
+            document.getElementById('modalImage').src = imageSrc;
+            document.getElementById('imageModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeImageModal();
+        });
+    </script>
+
 @endsection
