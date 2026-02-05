@@ -124,14 +124,14 @@ class TicketController extends Controller
             $tickets = \App\Models\Ticket::with('user')->latest()->get();
         } elseif ($user->role == 'teknisi') {
             $tickets = \App\Models\Ticket::with('user')
-                            ->where('teknisi_id', $userId)
-                            ->latest()
-                            ->get();
+                ->where('teknisi_id', $userId)
+                ->latest()
+                ->get();
         } else {
             $tickets = \App\Models\Ticket::with('user')
-                            ->where('user_id', $userId)
-                            ->latest()
-                            ->get();
+                ->where('user_id', $userId)
+                ->latest()
+                ->get();
         }
 
         return view('dashboard', compact('tickets'));
