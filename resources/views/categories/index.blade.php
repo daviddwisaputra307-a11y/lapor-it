@@ -1,99 +1,92 @@
 @extends('layouts.app')
 
-@section('title', 'Categories')
+@section('title', 'Kategori - Lapor IT')
 
 @section('content')
-    <div class="max-w-full mx-auto">
+    <div class="max-w-full mx-auto space-y-6">
 
         <!-- Header -->
-        <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-3">
-                <!-- Back Button -->
-                <a href="{{ url()->previous() }}"
-                    class="inline-flex items-center px-3 py-1.5 text-sm rounded-xl border border-slate-300 text-slate-600 bg-white hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 transition">
-                    ← Kembali
-                </a>
-
-                <!-- Title -->
-                <div>
-                    <h2 class="text-lg font-semibold">📂 Kelola Kategori</h2>
-                    <div class="text-sm text-slate-500">
-                        Daftar kategori tiket yang tersedia
+        <div class="bg-gradient-to-r from-blue-500 to-cyan-400 rounded-2xl p-6 shadow-lg text-white">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div>
+                        <h1 class="text-2xl font-bold">Kelola Kategori</h1>
+                        <p class="text-blue-50">Lapor IT - Manajemen Kategori Tiket Problem Solving IT</p>
                     </div>
                 </div>
+                <a href="{{ route('categories.create') }}"
+                    class="inline-flex items-center px-5 py-2.5 bg-white text-blue-600 rounded-xl font-semibold text-sm hover:bg-blue-50 transition-colors shadow-md">
+                    Tambah Kategori
+                </a>
             </div>
-
-            <!-- Primary Button -->
-            <a href="{{ route('categories.create') }}"
-                class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-xl border border-blue-600 text-blue-700 bg-white hover:bg-blue-600 hover:text-white transition">
-                + Tambah Kategori
-            </a>
         </div>
 
         <!-- Alert -->
         @if (session('success'))
-            <div
-                class="mb-4 px-4 py-3 rounded-xl border
-                        bg-emerald-50 border-emerald-200 text-emerald-800 text-sm">
+            <div class="px-4 py-3 rounded-xl border bg-emerald-50 border-emerald-200 text-emerald-800 text-sm flex items-center gap-2 shadow-sm">
                 {{ session('success') }}
             </div>
         @endif
 
         <!-- Card -->
-        <div class="bg-white border border-slate-200 rounded-2xl p-4">
+        <div class="bg-white border border-blue-100 rounded-2xl shadow-lg overflow-hidden">
             @if ($categories->isEmpty())
-                <div class="text-center py-10 text-slate-400 text-sm">
-                    Belum ada kategori. Silakan tambah kategori baru.
+                <div class="text-center py-16 text-gray-400">
+                    <p class="text-sm italic">Belum ada kategori. Silakan tambah kategori baru.</p>
                 </div>
             @else
-                <table class="w-full border-collapse">
-                    <thead>
-                        <tr class="bg-slate-50">
-                            <th class="px-3 py-3 text-left text-sm font-semibold border-b">No</th>
-                            <th class="px-3 py-3 text-left text-sm font-semibold border-b">Nama Kategori</th>
-                            <th class="px-3 py-3 text-center text-sm font-semibold border-b">Deskripsi</th>
-                            <th class="px-3 py-3 text-right text-sm font-semibold border-b">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($categories as $cat)
-                            <tr class="border-b last:border-b-0 hover:bg-slate-100">
-                                <td class="px-3 py-3 text-sm">
-                                    {{ $loop->iteration + ($categories->currentPage() - 1) * $categories->perPage() }}
-                                </td>
-                                <td class="px-3 py-3 text-sm font-semibold">
-                                    {{ $cat->nama_kategori }}
-                                </td>
-                                <td class="px-3 py-3 text-sm {{ $cat->deskripsi ? 'text-left' : 'text-center' }}">
-                                    {{ $cat->deskripsi ?? '-' }}
-                                </td>
-                                <td class="px-3 py-3 text-right">
-                                    <div class="flex justify-end gap-2">
-                                        <!-- Edit -->
-                                        <a href="{{ route('categories.edit', $cat->id) }}"
-                                            class="px-3 py-1.5 text-xs rounded-xl border border-blue-600 text-blue-700 bg-blue-50 hover:bg-blue-600 hover:text-white transition">
-                                            Edit
-                                        </a>
-
-                                        <!-- Delete -->
-                                        <form method="POST" action="{{ route('categories.destroy', $cat->id) }}"
-                                            onsubmit="return confirm('Yakin hapus kategori ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                class="hidden px-3 py-1.5 text-xs rounded-xl border border-red-600 text-red-700 bg-red-50 hover:bg-red-600 hover:text-white transition">
-                                                Hapus
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr class="bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-900">
+                                <th class="px-4 py-3 text-left text-sm font-bold border-b border-blue-200">No</th>
+                                <th class="px-4 py-3 text-left text-sm font-bold border-b border-blue-200">Nama Kategori</th>
+                                <th class="px-4 py-3 text-left text-sm font-bold border-b border-blue-200">Deskripsi</th>
+                                <th class="px-4 py-3 text-right text-sm font-bold border-b border-blue-200">Aksi</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody class="divide-y divide-blue-50">
+                            @foreach ($categories as $cat)
+                                <tr class="hover:bg-blue-50 transition-colors">
+                                    <td class="px-4 py-3 text-sm text-gray-700">
+                                        {{ $loop->iteration + ($categories->currentPage() - 1) * $categories->perPage() }}
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-sm font-bold text-gray-900">{{ $cat->nama_kategori }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-600">
+                                        {{ $cat->deskripsi ?? '-' }}
+                                    </td>
+                                    <td class="px-4 py-3 text-right">
+                                        <div class="flex justify-end gap-2">
+                                            <!-- Edit -->
+                                            <a href="{{ route('categories.edit', $cat->id) }}"
+                                                class="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-600 hover:text-white transition font-semibold">
+                                                Edit
+                                            </a>
+
+                                            <!-- Delete -->
+                                            <form method="POST" action="{{ route('categories.destroy', $cat->id) }}"
+                                                onsubmit="return confirm('Yakin hapus kategori ini?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                    class="hidden inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded-xl bg-red-100 text-red-700 hover:bg-red-600 hover:text-white transition font-semibold">
+                                                    Hapus
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
 
                 <!-- Pagination -->
-                <div class="mt-4">
+                <div class="px-4 py-3 bg-gray-50 border-t border-blue-100">
                     {{ $categories->links() }}
                 </div>
             @endif

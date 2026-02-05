@@ -47,23 +47,21 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | ADMIN TICKETS (TESTING MODE - SEMUA BISA AKSES)
+    | ADMIN TICKETS (Menggunakan AdminTicketController)
     |--------------------------------------------------------------------------
     */
-    // Route::middleware(['role:admin'])->group(function () {  <-- SAYA MATIKAN
-
     Route::get('/admin/tickets', [AdminTicketController::class, 'index'])
         ->name('admin.tickets.index');
 
-    Route::get('/admin/tickets/{ticket}', [AdminTicketController::class, 'show'])
-        ->name('admin.tickets.show');
+    Route::get('/admin/tickets/{ticket}', [AdminTicketController::class, 'edit'])
+        ->name('admin.tickets.edit');
 
+    // Sesuai dengan form di show.blade.php
     Route::post('/admin/tickets/{ticket}/assign', [AdminTicketController::class, 'assign'])
         ->name('admin.tickets.assign');
 
     Route::post('/admin/tickets/{ticket}/status', [AdminTicketController::class, 'status'])
         ->name('admin.tickets.status');
-    // });
 
     /*
     |--------------------------------------------------------------------------
@@ -84,11 +82,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/tickets/create', [TicketController::class, 'create'])->name('tickets.create');
     Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
 
-     /*
-     |---------------------------------------------------------------------     
-     |   DETAIL TIKET
-     |----------------------------------------------------------------------
-     */
+
+    // DETAIL TIKET
 
     Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
 

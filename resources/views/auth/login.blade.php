@@ -1,53 +1,52 @@
-<x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
-
-    <div class="mb-4 text-center">
-        <h2 class="text-xl font-bold">Login Karyawan</h2>
-        <p class="text-gray-500">Silakan masuk untuk melapor</p>
-    </div>
-    <form method="POST" action="{{ route('login') }}">
-        @csrf
-
-        <!-- Username -->
-        <div>
-            <x-input-label for="uslognm" :value="__('Username')" />
-            <x-text-input id="uslognm" class="block mt-1 w-full" type="text" name="uslognm" :value="old('uslognm')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('uslognm')" class="mt-2" />
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Login - Lapor IT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-blue-200 via-white to-blue-400 py-8 px-2">
+    <div class="w-full max-w-md bg-white/80 shadow-xl rounded-3xl p-8 backdrop-blur-md border border-blue-100 relative">
+        <div class="flex flex-col items-center mb-6">
+            <div class="bg-gradient-to-tr from-blue-500 to-cyan-400 rounded-full p-3 shadow-lg mb-2">
+                <span class="material-icons text-white text-4xl">medical_services</span>
+            </div>
+            <h1 class="text-3xl font-extrabold text-blue-700 tracking-tight mb-1">Lapor IT</h1>
+            <p class="text-sm text-blue-500 font-medium mb-2">Platform Tiketing Problem Solving IT Rumah Sakit</p>
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
-                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Remember me') }}</span>
-            </label>
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-        @if (Route::has('password.request'))
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                {{ __('Forgot your password?') }}
-            </a>
+        @if (session('status'))
+            <div class="mb-4 font-medium text-sm text-green-600 bg-green-50 p-3 rounded-lg">
+                {{ session('status') }}
+            </div>
         @endif
 
-
-
-        <x-primary-button class="ml-3 whitespace-nowrap w-auto px-6">
-            {{ __('Log in') }}
-        </x-primary-button>
+        <form method="POST" action="{{ route('login') }}" class="space-y-5">
+            @csrf
+            <div>
+                <label for="uslognm" class="block text-blue-700 font-semibold mb-1">Username</label>
+                <input id="uslognm" class="block w-full rounded-xl border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 shadow-sm px-4 py-2 border" type="text" name="uslognm" value="{{ old('uslognm') }}" required autofocus autocomplete="username" />
+                @error('uslognm')
+                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+            <div>
+                <label for="password" class="block text-blue-700 font-semibold mb-1">Password</label>
+                <input id="password" class="block w-full rounded-xl border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 shadow-sm px-4 py-2 border" type="password" name="password" required autocomplete="current-password" />
+                @error('password')
+                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+            <div class="flex items-center justify-between mt-6">
+                <span class="text-xs text-gray-400">© {{ date('Y') }} Lapor IT</span>
+                <button type="submit" class="w-auto px-8 py-2 bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-bold rounded-xl shadow hover:scale-105 transition-transform flex items-center">
+                    <span class="material-icons align-middle mr-1 text-base">login</span> Log in
+                </button>
+            </div>
+        </form>
     </div>
-    </form>
-</x-guest-layout>
+</body>
+</html>
