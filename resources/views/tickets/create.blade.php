@@ -143,6 +143,11 @@
                                     ✏️ Draw
                                 </button>
 
+                                <button type="button" id="btnArrow"
+                                    class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700 transition-all shadow-sm">
+                                    ➡️ Arrow
+                                </button>
+
                                 <button type="button" id="btnRedo" onclick="redoCanvas()"
                                     class="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-bold hover:bg-gray-700 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
                                     ↪️ Redo
@@ -211,6 +216,10 @@
         let canvasHistory = [];
         let historyStep = -1;
         let saveTimeout = null;
+        let currentMode = 'draw'; // 'draw' atau 'arrow'
+        let isDrawingArrow = false;
+        let arrowStartPoint = null;
+        let tempArrow = null; // Untuk live preview
 
         document.addEventListener('DOMContentLoaded', function() {
 
@@ -250,6 +259,18 @@
             });
 
             function handleImageFile(file) {
+                // Validate size (2MB)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('❌ Ukuran gambar maksimal 2MB!');
+                    return;
+                }
+
+                // Validate type
+                if (!file.type.match('image/(png|jpeg|jpg)')) {
+                    alert('❌ Format gambar harus PNG, JPG, atau JPEG!');
+                    return;
+                }
+
                 const reader = new FileReader();
                 reader.onload = e => initCanvas(e.target.result);
                 reader.readAsDataURL(file);
@@ -272,7 +293,8 @@
 
                 canvas = new fabric.Canvas('canvas', {
                     isDrawingMode: true,
-                    renderOnAddRemove: false
+                    renderOnAddRemove: false,
+                    selection: false
                 });
 
                 fabric.Image.fromURL(imageDataUrl, function(img) {
@@ -306,13 +328,16 @@
 
                     canvas.freeDrawingBrush = brush;
 
+                    // Set default mode
+                    currentMode = 'draw';
+                    updateButtonStates();
+
                     saveSnapshot();
                     updateBase64();
                 });
 
                 /* Drawing finished */
                 canvas.on('path:created', function() {
-
                     mergeDrawing();
 
                     clearTimeout(saveTimeout);
@@ -321,6 +346,145 @@
                         updateBase64();
                     }, 100);
                 });
+
+                /* Arrow drawing events */
+                canvas.on('mouse:down', function(o) {
+                    if (currentMode !== 'arrow') return;
+
+                    isDrawingArrow = true;
+                    const pointer = canvas.getPointer(o.e);
+                    arrowStartPoint = {
+                        x: pointer.x,
+                        y: pointer.y
+                    };
+                });
+
+                canvas.on('mouse:move', function(o) {
+                    if (currentMode !== 'arrow' || !isDrawingArrow) return;
+
+                    const pointer = canvas.getPointer(o.e);
+
+                    // Remove previous temp arrow
+                    if (tempArrow) {
+                        tempArrow.line && canvas.remove(tempArrow.line);
+                        tempArrow.headLeft && canvas.remove(tempArrow.headLeft);
+                        tempArrow.headRight && canvas.remove(tempArrow.headRight);
+                    }
+
+                    // Draw preview arrow
+                    tempArrow = createArrowObjects(arrowStartPoint, pointer, true);
+
+                    if (tempArrow.line) canvas.add(tempArrow.line);
+                    if (tempArrow.headLeft) canvas.add(tempArrow.headLeft);
+                    if (tempArrow.headRight) canvas.add(tempArrow.headRight);
+
+                    canvas.renderAll();
+                });
+
+                canvas.on('mouse:up', function(o) {
+                    if (currentMode !== 'arrow' || !isDrawingArrow) return;
+
+                    const pointer = canvas.getPointer(o.e);
+                    const endPoint = {
+                        x: pointer.x,
+                        y: pointer.y
+                    };
+
+                    // Remove temp preview
+                    if (tempArrow) {
+                        tempArrow.line && canvas.remove(tempArrow.line);
+                        tempArrow.headLeft && canvas.remove(tempArrow.headLeft);
+                        tempArrow.headRight && canvas.remove(tempArrow.headRight);
+                        tempArrow = null;
+                    }
+
+                    // Minimal distance untuk arrow
+                    const distance = Math.sqrt(
+                        Math.pow(endPoint.x - arrowStartPoint.x, 2) +
+                        Math.pow(endPoint.y - arrowStartPoint.y, 2)
+                    );
+
+                    if (distance > 10) {
+                        // Draw final arrow
+                        const finalArrow = createArrowObjects(arrowStartPoint, endPoint, false);
+
+                        if (finalArrow.line) canvas.add(finalArrow.line);
+                        if (finalArrow.headLeft) canvas.add(finalArrow.headLeft);
+                        if (finalArrow.headRight) canvas.add(finalArrow.headRight);
+
+                        canvas.renderAll();
+
+                        clearTimeout(saveTimeout);
+                        saveTimeout = setTimeout(() => {
+                            mergeDrawing();
+                            saveSnapshot();
+                            updateBase64();
+                        }, 100);
+                    }
+
+                    isDrawingArrow = false;
+                    arrowStartPoint = null;
+                });
+            }
+
+            /* =========================
+               CREATE ARROW OBJECTS
+            ========================== */
+
+            function createArrowObjects(start, end, isPreview) {
+                const color = document.getElementById('colorPicker').value;
+                const strokeWidth = parseInt(document.getElementById('brushSize').value);
+
+                const dx = end.x - start.x;
+                const dy = end.y - start.y;
+                const angle = Math.atan2(dy, dx);
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                // Minimal distance untuk arrow head
+                if (distance < 5) {
+                    return {
+                        line: null,
+                        headLeft: null,
+                        headRight: null
+                    };
+                }
+
+                // Arrow head size
+                const headLength = Math.min(20, strokeWidth * 5);
+                const headAngle = Math.PI / 6; // 30 degrees
+
+                const commonProps = {
+                    stroke: color,
+                    strokeWidth: strokeWidth,
+                    selectable: false,
+                    evented: false,
+                    opacity: isPreview ? 0.6 : 1 // Preview lebih transparan
+                };
+
+                // Arrow line
+                const line = new fabric.Line([start.x, start.y, end.x, end.y], commonProps);
+
+                // Arrow head - left
+                const headLeft = new fabric.Line([
+                    end.x,
+                    end.y,
+                    end.x - headLength * Math.cos(angle - headAngle),
+                    end.y - headLength * Math.sin(angle - headAngle)
+                ], commonProps);
+
+                // Arrow head - right
+                const headRight = new fabric.Line([
+                    end.x,
+                    end.y,
+                    end.x - headLength * Math.cos(angle + headAngle),
+                    end.y - headLength * Math.sin(angle + headAngle)
+                ], commonProps);
+
+                return {
+                    line,
+                    headLeft,
+                    headRight
+                };
             }
 
             /* =========================
@@ -342,7 +506,7 @@
                         canvas.renderAll.bind(canvas)
                     );
 
-                    canvas.isDrawingMode = true;
+                    canvas.isDrawingMode = (currentMode === 'draw');
                 });
             }
 
@@ -392,7 +556,7 @@
                         canvas.renderAll.bind(canvas)
                     );
 
-                    canvas.isDrawingMode = true;
+                    canvas.isDrawingMode = (currentMode === 'draw');
 
                     updateUndoRedoButtons();
                     updateBase64();
@@ -408,12 +572,59 @@
             }
 
             /* =========================
-               TOOLBAR
+               UPDATE BUTTON STATES
             ========================== */
+
+            function updateButtonStates() {
+                const btnDraw = document.getElementById('btnDraw');
+                const btnArrow = document.getElementById('btnArrow');
+
+                // Reset all buttons
+                btnDraw.classList.remove('ring-2', 'ring-blue-300', 'bg-blue-700');
+                btnDraw.classList.add('bg-blue-600');
+                btnArrow.classList.remove('ring-2', 'ring-green-300', 'bg-green-700');
+                btnArrow.classList.add('bg-green-600');
+
+                // Highlight active button
+                if (currentMode === 'draw') {
+                    btnDraw.classList.add('ring-2', 'ring-blue-300', 'bg-blue-700');
+                    btnDraw.classList.remove('bg-blue-600');
+                } else if (currentMode === 'arrow') {
+                    btnArrow.classList.add('ring-2', 'ring-green-300', 'bg-green-700');
+                    btnArrow.classList.remove('bg-green-600');
+                }
+            }
+
+            /* =========================
+               TOOLBAR CONTROLS
+            ========================== */
+
+            document.getElementById('btnDraw').onclick = () => {
+                if (!canvas) return;
+
+                currentMode = 'draw';
+                canvas.isDrawingMode = true;
+                canvas.selection = false;
+
+                updateButtonStates();
+                console.log('✏️ Draw mode aktif');
+            };
+
+            document.getElementById('btnArrow').onclick = () => {
+                if (!canvas) return;
+
+                currentMode = 'arrow';
+                canvas.isDrawingMode = false;
+                canvas.selection = false;
+
+                updateButtonStates();
+                console.log('➡️ Arrow mode aktif');
+            };
 
             document.getElementById('colorPicker').onchange = e => {
                 if (!canvas) return;
                 canvas.freeDrawingBrush.color = e.target.value;
+                console.log('🎨 Warna:', e.target.value);
             };
 
             document.getElementById('brushSize').oninput = e => {
@@ -422,6 +633,7 @@
                 const size = parseInt(e.target.value);
                 canvas.freeDrawingBrush.width = size;
                 document.getElementById('brushSizeValue').textContent = size;
+                console.log('📏 Ukuran:', size);
             };
 
             document.getElementById('btnClear').onclick = () => {
@@ -431,11 +643,14 @@
                 canvas = null;
                 canvasHistory = [];
                 historyStep = -1;
+                currentMode = 'draw';
+                tempArrow = null;
 
                 editorContainer.classList.add('hidden');
                 uploadArea.classList.remove('hidden');
                 fileInput.value = '';
                 gambarBase64Input.value = '';
+                console.log('🗑️ Canvas cleared');
             };
 
             /* =========================
@@ -445,12 +660,16 @@
             function updateBase64() {
                 if (!canvas) return;
                 gambarBase64Input.value = canvas.toDataURL({
-                    quality: 0.8
+                    format: 'png',
+                    multiplier: 1
                 });
             }
 
             formElement.addEventListener('submit', function() {
-                if (canvas) updateBase64();
+                if (canvas) {
+                    updateBase64();
+                    console.log('📤 Form submitted dengan gambar');
+                }
             });
 
         });
