@@ -148,6 +148,13 @@
                                     ➡️ Arrow
                                 </button>
 
+                                <button type="button" id="btnCrop"
+                                    class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-bold hover:bg-purple-700 transition-all shadow-sm">
+                                    ✂️ Crop
+                                </button>
+
+                                <div class="h-8 w-px bg-gray-300 mx-1"></div>
+
                                 <button type="button" id="btnRedo" onclick="redoCanvas()"
                                     class="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-bold hover:bg-gray-700 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
                                     ↪️ Redo
@@ -156,6 +163,11 @@
                                 <button type="button" id="btnUndo" onclick="undoCanvas()"
                                     class="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-bold hover:bg-orange-700 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
                                     ↩️ Undo
+                                </button>
+
+                                <button type="button" id="btnClearDrawings"
+                                    class="hidden px-4 py-2 bg-yellow-600 text-white rounded-lg text-sm font-bold hover:bg-yellow-700 transition-all shadow-sm">
+                                    🧹 Hapus Coretan
                                 </button>
 
                                 <div class="h-8 w-px bg-gray-300 mx-1"></div>
@@ -181,7 +193,7 @@
                             </div>
 
                             {{-- Canvas --}}
-                            <div class="flex justify-center bg-gray-100 rounded-lg p-4">
+                            <div class="flex justify-center bg-gray-100 rounded-lg p-4 overflow-auto">
                                 <canvas id="canvas"></canvas>
                             </div>
                         </div>
@@ -216,10 +228,14 @@
         let canvasHistory = [];
         let historyStep = -1;
         let saveTimeout = null;
-        let currentMode = 'draw'; // 'draw' atau 'arrow'
+        let currentMode = 'draw'; // 'draw', 'arrow', atau 'crop'
         let isDrawingArrow = false;
         let arrowStartPoint = null;
-        let tempArrow = null; // Untuk live preview
+        let tempArrow = null;
+        let cropRect = null;
+        let isCropping = false;
+        let cropStartPoint = null;
+        let baseImageSnapshot = null; // Snapshot gambar tanpa coretan
 
         document.addEventListener('DOMContentLoaded', function() {
 
@@ -249,7 +265,7 @@
             });
 
             /* =========================
-               IMAGE LOAD
+                IMAGE LOAD
             ========================== */
 
             uploadArea.addEventListener('click', () => fileInput.click());
@@ -277,7 +293,7 @@
             }
 
             /* =========================
-               CANVAS INIT
+                CANVAS INIT
             ========================== */
 
             function initCanvas(imageDataUrl) {
@@ -294,13 +310,14 @@
                 canvas = new fabric.Canvas('canvas', {
                     isDrawingMode: true,
                     renderOnAddRemove: false,
-                    selection: false
+                    selection: false,
+                    enableRetinaScaling: true // Kualitas tinggi untuk retina display
                 });
 
                 fabric.Image.fromURL(imageDataUrl, function(img) {
 
-                    const maxW = 800;
-                    const maxH = 600;
+                    const maxW = 1920;
+                    const maxH = 1080;
 
                     const scale = Math.min(
                         maxW / img.width,
@@ -320,6 +337,12 @@
                         canvas.renderAll.bind(canvas)
                     );
 
+                    // Simpan snapshot gambar dasar (tanpa coretan)
+                    setTimeout(() => {
+                        baseImageSnapshot = canvas.toDataURL('image/png');
+                        console.log('📸 Base image saved');
+                    }, 100);
+
                     /* Smooth brush */
                     const brush = new fabric.PencilBrush(canvas);
                     brush.width = 3;
@@ -338,97 +361,170 @@
 
                 /* Drawing finished */
                 canvas.on('path:created', function() {
-                    mergeDrawing();
-
+                    // Delay merge untuk performa
                     clearTimeout(saveTimeout);
                     saveTimeout = setTimeout(() => {
+                        mergeDrawing();
                         saveSnapshot();
                         updateBase64();
                     }, 100);
                 });
 
-                /* Arrow drawing events */
+                /* Mouse Events untuk Arrow & Crop */
                 canvas.on('mouse:down', function(o) {
-                    if (currentMode !== 'arrow') return;
-
-                    isDrawingArrow = true;
                     const pointer = canvas.getPointer(o.e);
-                    arrowStartPoint = {
-                        x: pointer.x,
-                        y: pointer.y
-                    };
+
+                    if (currentMode === 'arrow') {
+                        isDrawingArrow = true;
+                        arrowStartPoint = {
+                            x: pointer.x,
+                            y: pointer.y
+                        };
+                    } else if (currentMode === 'crop') {
+                        isCropping = true;
+                        cropStartPoint = {
+                            x: pointer.x,
+                            y: pointer.y
+                        };
+                    }
                 });
 
                 canvas.on('mouse:move', function(o) {
-                    if (currentMode !== 'arrow' || !isDrawingArrow) return;
-
                     const pointer = canvas.getPointer(o.e);
 
-                    // Remove previous temp arrow
-                    if (tempArrow) {
-                        tempArrow.line && canvas.remove(tempArrow.line);
-                        tempArrow.headLeft && canvas.remove(tempArrow.headLeft);
-                        tempArrow.headRight && canvas.remove(tempArrow.headRight);
+                    // Arrow preview
+                    if (currentMode === 'arrow' && isDrawingArrow) {
+                        // Remove previous temp arrow
+                        if (tempArrow) {
+                            tempArrow.line && canvas.remove(tempArrow.line);
+                            tempArrow.headLeft && canvas.remove(tempArrow.headLeft);
+                            tempArrow.headRight && canvas.remove(tempArrow.headRight);
+                        }
+
+                        // Draw preview arrow
+                        tempArrow = createArrowObjects(arrowStartPoint, pointer, true);
+
+                        if (tempArrow.line) canvas.add(tempArrow.line);
+                        if (tempArrow.headLeft) canvas.add(tempArrow.headLeft);
+                        if (tempArrow.headRight) canvas.add(tempArrow.headRight);
+
+                        canvas.renderAll();
                     }
 
-                    // Draw preview arrow
-                    tempArrow = createArrowObjects(arrowStartPoint, pointer, true);
+                    // Crop preview
+                    if (currentMode === 'crop' && isCropping) {
+                        // Remove previous crop rect
+                        if (cropRect) {
+                            canvas.remove(cropRect);
+                        }
 
-                    if (tempArrow.line) canvas.add(tempArrow.line);
-                    if (tempArrow.headLeft) canvas.add(tempArrow.headLeft);
-                    if (tempArrow.headRight) canvas.add(tempArrow.headRight);
+                        const left = Math.min(cropStartPoint.x, pointer.x);
+                        const top = Math.min(cropStartPoint.y, pointer.y);
+                        const width = Math.abs(pointer.x - cropStartPoint.x);
+                        const height = Math.abs(pointer.y - cropStartPoint.y);
 
-                    canvas.renderAll();
+                        cropRect = new fabric.Rect({
+                            left: left,
+                            top: top,
+                            width: width,
+                            height: height,
+                            fill: 'rgba(0, 123, 255, 0.15)',
+                            stroke: '#007bff',
+                            strokeWidth: 2,
+                            strokeDashArray: [5, 5],
+                            selectable: false,
+                            evented: false
+                        });
+
+                        canvas.add(cropRect);
+                        canvas.renderAll();
+                    }
                 });
 
                 canvas.on('mouse:up', function(o) {
-                    if (currentMode !== 'arrow' || !isDrawingArrow) return;
-
                     const pointer = canvas.getPointer(o.e);
-                    const endPoint = {
-                        x: pointer.x,
-                        y: pointer.y
-                    };
 
-                    // Remove temp preview
-                    if (tempArrow) {
-                        tempArrow.line && canvas.remove(tempArrow.line);
-                        tempArrow.headLeft && canvas.remove(tempArrow.headLeft);
-                        tempArrow.headRight && canvas.remove(tempArrow.headRight);
-                        tempArrow = null;
+                    // Arrow finalization
+                    if (currentMode === 'arrow' && isDrawingArrow) {
+                        const endPoint = {
+                            x: pointer.x,
+                            y: pointer.y
+                        };
+
+                        // Remove temp preview
+                        if (tempArrow) {
+                            tempArrow.line && canvas.remove(tempArrow.line);
+                            tempArrow.headLeft && canvas.remove(tempArrow.headLeft);
+                            tempArrow.headRight && canvas.remove(tempArrow.headRight);
+                            tempArrow = null;
+                        }
+
+                        // Minimal distance untuk arrow
+                        const distance = Math.sqrt(
+                            Math.pow(endPoint.x - arrowStartPoint.x, 2) +
+                            Math.pow(endPoint.y - arrowStartPoint.y, 2)
+                        );
+
+                        if (distance > 10) {
+                            // Draw final arrow
+                            const finalArrow = createArrowObjects(arrowStartPoint, endPoint, false);
+
+                            if (finalArrow.line) canvas.add(finalArrow.line);
+                            if (finalArrow.headLeft) canvas.add(finalArrow.headLeft);
+                            if (finalArrow.headRight) canvas.add(finalArrow.headRight);
+
+                            canvas.renderAll();
+
+                            clearTimeout(saveTimeout);
+                            saveTimeout = setTimeout(() => {
+                                mergeDrawing();
+                                saveSnapshot();
+                                updateBase64();
+                            }, 100);
+                        }
+
+                        isDrawingArrow = false;
+                        arrowStartPoint = null;
                     }
 
-                    // Minimal distance untuk arrow
-                    const distance = Math.sqrt(
-                        Math.pow(endPoint.x - arrowStartPoint.x, 2) +
-                        Math.pow(endPoint.y - arrowStartPoint.y, 2)
-                    );
+                    // Crop finalization
+                    if (currentMode === 'crop' && isCropping) {
+                        if (cropRect && cropRect.width > 30 && cropRect.height > 30) {
+                            // Remove crop rect dari canvas sebelum apply
+                            canvas.remove(cropRect);
+                            canvas.renderAll();
 
-                    if (distance > 10) {
-                        // Draw final arrow
-                        const finalArrow = createArrowObjects(arrowStartPoint, endPoint, false);
+                            const cropData = {
+                                left: cropRect.left,
+                                top: cropRect.top,
+                                width: cropRect.width,
+                                height: cropRect.height
+                            };
 
-                        if (finalArrow.line) canvas.add(finalArrow.line);
-                        if (finalArrow.headLeft) canvas.add(finalArrow.headLeft);
-                        if (finalArrow.headRight) canvas.add(finalArrow.headRight);
+                            applyCrop(cropData);
+                        } else {
+                            // Remove invalid crop rect
+                            if (cropRect) {
+                                canvas.remove(cropRect);
+                                canvas.renderAll();
+                            }
+                            alert('Area crop terlalu kecil. Minimal 30x30 pixel.');
+                        }
 
-                        canvas.renderAll();
+                        cropRect = null;
+                        isCropping = false;
+                        cropStartPoint = null;
 
-                        clearTimeout(saveTimeout);
-                        saveTimeout = setTimeout(() => {
-                            mergeDrawing();
-                            saveSnapshot();
-                            updateBase64();
-                        }, 100);
+                        // Kembali ke draw mode setelah crop
+                        currentMode = 'draw';
+                        canvas.isDrawingMode = true;
+                        updateButtonStates();
                     }
-
-                    isDrawingArrow = false;
-                    arrowStartPoint = null;
                 });
             }
 
             /* =========================
-               CREATE ARROW OBJECTS
+                CREATE ARROW OBJECTS
             ========================== */
 
             function createArrowObjects(start, end, isPreview) {
@@ -458,7 +554,7 @@
                     strokeWidth: strokeWidth,
                     selectable: false,
                     evented: false,
-                    opacity: isPreview ? 0.6 : 1 // Preview lebih transparan
+                    opacity: isPreview ? 0.6 : 1
                 };
 
                 // Arrow line
@@ -488,14 +584,112 @@
             }
 
             /* =========================
-               MERGE DRAWINGS
-               keeps canvas light
+                APPLY CROP
+            ========================== */
+
+            function applyCrop(cropData) {
+                if (!canvas || !cropData) return;
+
+                console.log('✂️ Memulai crop...');
+
+                // Get current canvas sebagai high-quality image
+                const currentDataURL = canvas.toDataURL('image/png');
+
+                fabric.Image.fromURL(currentDataURL, function(img) {
+
+                    // Set crop parameters
+                    const scaleX = img.scaleX || 1;
+                    const scaleY = img.scaleY || 1;
+
+                    const cropX = cropData.left / scaleX;
+                    const cropY = cropData.top / scaleY;
+                    const cropWidth = cropData.width / scaleX;
+                    const cropHeight = cropData.height / scaleY;
+
+                    // Apply crop
+                    img.set({
+                        cropX: cropX,
+                        cropY: cropY,
+                        width: cropWidth,
+                        height: cropHeight,
+                        left: 0,
+                        top: 0
+                    });
+
+                    // Resize canvas
+                    canvas.setWidth(cropData.width);
+                    canvas.setHeight(cropData.height);
+
+                    // Clear canvas
+                    canvas.clear();
+
+                    // Set cropped image as background
+                    canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+                        scaleX: scaleX,
+                        scaleY: scaleY
+                    });
+
+                    // Update base snapshot setelah crop
+                    setTimeout(() => {
+                        baseImageSnapshot = canvas.toDataURL('image/png');
+                        saveSnapshot();
+                        updateBase64();
+                        console.log('✂️ Crop selesai, base image updated');
+                    }, 100);
+
+                });
+            }
+
+            /* =========================
+                CLEAR DRAWINGS
+            ========================== */
+
+            function clearDrawings() {
+                if (!canvas || !baseImageSnapshot) {
+                    alert('Tidak ada gambar dasar untuk dikembalikan.');
+                    return;
+                }
+
+                if (!confirm('Yakin ingin menghapus semua coretan?\n\nGambar dasar akan dikembalikan.')) {
+                    return;
+                }
+
+                console.log('🧹 Menghapus coretan...');
+
+                fabric.Image.fromURL(baseImageSnapshot, function(img) {
+
+                    // Simpan ukuran canvas saat ini
+                    const currentWidth = canvas.width;
+                    const currentHeight = canvas.height;
+
+                    // Clear canvas
+                    canvas.clear();
+
+                    // Restore canvas size jika berbeda
+                    if (img.width !== currentWidth || img.height !== currentHeight) {
+                        canvas.setWidth(img.width);
+                        canvas.setHeight(img.height);
+                    }
+
+                    // Set base image as background
+                    canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
+
+                    // Save snapshot
+                    saveSnapshot();
+                    updateBase64();
+
+                    console.log('🧹 Coretan berhasil dihapus');
+                });
+            }
+
+            /* =========================
+                MERGE DRAWINGS
             ========================== */
 
             function mergeDrawing() {
                 if (!canvas) return;
 
-                const dataURL = canvas.toDataURL();
+                const dataURL = canvas.toDataURL('image/png');
 
                 fabric.Image.fromURL(dataURL, function(img) {
 
@@ -511,13 +705,16 @@
             }
 
             /* =========================
-               HISTORY SNAPSHOT
+                HISTORY SNAPSHOT
             ========================== */
 
             function saveSnapshot() {
+                if (!canvas) return;
+
                 canvasHistory = canvasHistory.slice(0, historyStep + 1);
 
-                canvasHistory.push(canvas.toDataURL());
+                // Save dengan kualitas tinggi
+                canvasHistory.push(canvas.toDataURL('image/png'));
                 historyStep = canvasHistory.length - 1;
 
                 if (canvasHistory.length > 20) {
@@ -529,7 +726,7 @@
             }
 
             /* =========================
-               UNDO / REDO FAST
+                UNDO / REDO
             ========================== */
 
             window.undoCanvas = function() {
@@ -547,9 +744,22 @@
             };
 
             function restoreSnapshot() {
-                fabric.Image.fromURL(canvasHistory[historyStep], function(img) {
+                if (!canvas) return;
+
+                const snapshotData = canvasHistory[historyStep];
+
+                fabric.Image.fromURL(snapshotData, function(img) {
+
+                    const currentWidth = canvas.width;
+                    const currentHeight = canvas.height;
 
                     canvas.clear();
+
+                    // Restore canvas size jika berbeda (karena crop)
+                    if (img.width !== currentWidth || img.height !== currentHeight) {
+                        canvas.setWidth(img.width);
+                        canvas.setHeight(img.height);
+                    }
 
                     canvas.setBackgroundImage(
                         img,
@@ -572,18 +782,21 @@
             }
 
             /* =========================
-               UPDATE BUTTON STATES
+                UPDATE BUTTON STATES
             ========================== */
 
             function updateButtonStates() {
                 const btnDraw = document.getElementById('btnDraw');
                 const btnArrow = document.getElementById('btnArrow');
+                const btnCrop = document.getElementById('btnCrop');
 
                 // Reset all buttons
                 btnDraw.classList.remove('ring-2', 'ring-blue-300', 'bg-blue-700');
                 btnDraw.classList.add('bg-blue-600');
                 btnArrow.classList.remove('ring-2', 'ring-green-300', 'bg-green-700');
                 btnArrow.classList.add('bg-green-600');
+                btnCrop.classList.remove('ring-2', 'ring-purple-300', 'bg-purple-700');
+                btnCrop.classList.add('bg-purple-600');
 
                 // Highlight active button
                 if (currentMode === 'draw') {
@@ -592,11 +805,14 @@
                 } else if (currentMode === 'arrow') {
                     btnArrow.classList.add('ring-2', 'ring-green-300', 'bg-green-700');
                     btnArrow.classList.remove('bg-green-600');
+                } else if (currentMode === 'crop') {
+                    btnCrop.classList.add('ring-2', 'ring-purple-300', 'bg-purple-700');
+                    btnCrop.classList.remove('bg-purple-600');
                 }
             }
 
             /* =========================
-               TOOLBAR CONTROLS
+                TOOLBAR CONTROLS
             ========================== */
 
             document.getElementById('btnDraw').onclick = () => {
@@ -619,6 +835,21 @@
 
                 updateButtonStates();
                 console.log('➡️ Arrow mode aktif');
+            };
+
+            document.getElementById('btnCrop').onclick = () => {
+                if (!canvas) return;
+
+                currentMode = 'crop';
+                canvas.isDrawingMode = false;
+                canvas.selection = false;
+
+                updateButtonStates();
+                console.log('✂️ Crop mode aktif - drag area yang ingin di-crop');
+            };
+
+            document.getElementById('btnClearDrawings').onclick = () => {
+                clearDrawings();
             };
 
             document.getElementById('colorPicker').onchange = e => {
@@ -645,6 +876,8 @@
                 historyStep = -1;
                 currentMode = 'draw';
                 tempArrow = null;
+                cropRect = null;
+                baseImageSnapshot = null;
 
                 editorContainer.classList.add('hidden');
                 uploadArea.classList.remove('hidden');
@@ -654,21 +887,21 @@
             };
 
             /* =========================
-               SUBMIT
+                SUBMIT
             ========================== */
 
             function updateBase64() {
                 if (!canvas) return;
-                gambarBase64Input.value = canvas.toDataURL({
-                    format: 'png',
-                    multiplier: 1
-                });
+
+                // Format PNG untuk kualitas tajam, kompresi ringan 0.95
+                gambarBase64Input.value = canvas.toDataURL('image/png', 0.9);
             }
 
             formElement.addEventListener('submit', function() {
                 if (canvas) {
                     updateBase64();
-                    console.log('📤 Form submitted dengan gambar');
+                    const sizeKB = (gambarBase64Input.value.length / 1024).toFixed(2);
+                    console.log('📤 Form submitted, ukuran gambar:', sizeKB, 'KB');
                 }
             });
 
